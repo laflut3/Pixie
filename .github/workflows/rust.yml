@@ -42,12 +42,13 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            pixie/target
           key: ${{ runner.os }}-cargo-fmt-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-fmt-
 
       - name: Check formatting
+        working-directory: pixie
         run: cargo fmt --all -- --check
 
   clippy:
@@ -69,12 +70,13 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            pixie/target
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-clippy-
 
       - name: Run clippy
+        working-directory: pixie
         run: cargo clippy --all-targets --all-features -- -D warnings
 
   test:
@@ -99,12 +101,13 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            pixie/target
           key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-test-
 
       - name: Run tests
+        working-directory: pixie
         run: cargo test --all-features --locked --verbose
 
   build:
@@ -128,10 +131,11 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            pixie/target
           key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-build-
 
       - name: Build release
+        working-directory: pixie
         run: cargo build --release --locked --verbose
