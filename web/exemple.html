@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Exemple | Pixie</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f7f4ee;
+        --paper: #fffdf9;
+        --ink: #23211f;
+        --ink-soft: #5f5b56;
+        --line: #e3d9cd;
+        --brand: #d8683a;
+        --brand-2: #0d8b8b;
+        --shadow: 0 18px 40px rgba(35, 33, 31, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Manrope", "Trebuchet MS", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 10% 10%, rgba(216, 104, 58, 0.2), transparent 40%),
+          radial-gradient(circle at 90% 20%, rgba(13, 139, 139, 0.16), transparent 40%),
+          var(--bg);
+      }
+
+      .page {
+        width: min(1040px, 92vw);
+        margin: 32px auto 48px;
+      }
+
+      .hero,
+      .panel,
+      .quote {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        padding: 34px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -90px;
+        top: -90px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, rgba(216, 104, 58, 0.25), rgba(13, 139, 139, 0.15));
+      }
+
+      .kicker {
+        display: inline-block;
+        font-size: 0.8rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 11px;
+        background: #fff;
+      }
+
+      h1 {
+        margin: 14px 0 12px;
+        font-family: "Fraunces", "Georgia", serif;
+        font-size: clamp(2.1rem, 6vw, 4rem);
+        line-height: 0.98;
+        max-width: 12ch;
+      }
+
+      .lead {
+        margin: 0;
+        max-width: 62ch;
+        color: var(--ink-soft);
+        line-height: 1.6;
+      }
+
+      .accent {
+        color: var(--brand);
+      }
+
+      .grid {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .panel {
+        padding: 20px;
+      }
+
+      .panel h2 {
+        margin: 0 0 10px;
+        font-family: "Fraunces", "Georgia", serif;
+        font-size: 1.35rem;
+      }
+
+      .panel p {
+        margin: 0;
+        color: var(--ink-soft);
+        line-height: 1.55;
+      }
+
+      .quote {
+        margin-top: 18px;
+        padding: 24px;
+        border-left: 7px solid var(--brand-2);
+      }
+
+      blockquote {
+        margin: 0;
+        font-family: "Fraunces", "Georgia", serif;
+        font-size: clamp(1.2rem, 2.8vw, 1.8rem);
+        line-height: 1.25;
+      }
+
+      .small {
+        margin-top: 10px;
+        color: var(--ink-soft);
+        font-size: 0.92rem;
+      }
+
+      .fade-up {
+        opacity: 0;
+        transform: translateY(12px);
+        animation: rise 700ms ease forwards;
+      }
+
+      .d1 {
+        animation-delay: 110ms;
+      }
+
+      .d2 {
+        animation-delay: 220ms;
+      }
+
+      .d3 {
+        animation-delay: 330ms;
+      }
+
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          padding: 26px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero fade-up">
+        <span class="kicker">Page Exemple</span>
+        <h1>Un rendu <span class="accent">Lorem Ipsum</span> un peu plus joli.</h1>
+        <p class="lead">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer non nisi
+          feugiat, porta elit nec, maximus augue. Pellentesque habitant morbi tristique
+          senectus et netus et malesuada fames ac turpis egestas.
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="panel fade-up d1">
+          <h2>Bloc Alpha</h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt
+            placerat sem, eget tempor nisi tincidunt sit amet.
+          </p>
+        </article>
+
+        <article class="panel fade-up d2">
+          <h2>Bloc Beta</h2>
+          <p>
+            Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere
+            cubilia curae; Curabitur eu lorem vel augue dignissim euismod.
+          </p>
+        </article>
+
+        <article class="panel fade-up d3">
+          <h2>Bloc Gamma</h2>
+          <p>
+            Quisque finibus, lectus nec efficitur volutpat, est ipsum tristique magna,
+            a porta lorem nibh non purus. Fusce non ante non eros tempus semper.
+          </p>
+        </article>
+      </section>
+
+      <section class="quote fade-up d2">
+        <blockquote>
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor."
+        </blockquote>
+        <p class="small">Version de demonstration servie par ton serveur Rust.</p>
+      </section>
+    </main>
+  </body>
+</html>
