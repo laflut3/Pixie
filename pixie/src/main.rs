@@ -31,7 +31,6 @@ fn main() -> io::Result<()> {
 }
 
 fn add_path(request_line: String) -> PathBuf {
-
     let path = request_line
         .split_whitespace()
         .nth(1)
@@ -40,7 +39,7 @@ fn add_path(request_line: String) -> PathBuf {
         .split('?')
         .next()
         .unwrap_or("");
-    
+
     let html_path = if path.is_empty() {
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/hello.html")
     } else {
@@ -49,7 +48,7 @@ fn add_path(request_line: String) -> PathBuf {
             .join(format!("{path}.html"))
     };
 
-    return html_path
+    return html_path;
 }
 
 fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
@@ -58,7 +57,7 @@ fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
         Some(line) => line,
         None => return Ok(()),
     };
-    
+
     let (mut status_line, mut filename) = if request_line.starts_with("GET /") {
         let status = "HTTP/1.1 200 OK";
         let html_path = add_path(request_line);
@@ -76,8 +75,7 @@ fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
     let contents = fs::read_to_string(filename)?;
     let length = contents.len();
 
-    let response =
-        format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+    let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
     stream.write_all(response.as_bytes())?;
     Ok(())
