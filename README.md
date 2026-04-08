@@ -32,6 +32,13 @@ sudo apt install --only-upgrade -y pixie
 
 ```bash
 sudo systemctl status pixie
-pixie log
-pixie log -f
+sudo journalctl -u pixie.service -n 100 --no-pager
+sudo journalctl -u pixie.service -f
+```
+
+Option (sans `sudo`, si ton user est dans `adm` ou `systemd-journal`):
+
+```bash
+pixie log -q
+pixie log -q -f
 ```
