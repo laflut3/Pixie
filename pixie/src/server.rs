@@ -7,6 +7,12 @@ use std::{
     sync::Arc,
 };
 
+use super::{
+    log_info,
+    log_warn,
+    log_error
+};
+
 use crate::ThreadPool;
 
 const DEFAULT_WEB_ROOT: &str = "/usr/share/pixie/web";
@@ -50,7 +56,7 @@ fn resolve_web_root() -> PathBuf {
             let candidate = PathBuf::from(trimmed);
             if candidate.is_dir() {
                 return candidate;
-            }
+        }
             log_warn(format_args!(
                 "PIXIE_WEB_ROOT='{}' is not a directory, using fallback",
                 candidate.display()
