@@ -68,16 +68,21 @@ if [[ -n "$GPG_KEY_ID" ]]; then
   rm -f "$TMP_ASC"
 fi
 
+if [[ "$REPO_DIR" == /home/* ]]; then
+  cat <<EOF
+Warning:
+  REPO_DIR is under /home ($REPO_DIR).
+  apt may show '_apt permission denied' warnings with file: repositories under /home.
+  Prefer hosting over HTTPS or moving the repo under /srv (example: /srv/pixie-apt).
+EOF
+fi
+
 cat <<EOF
 Repository updated in: $REPO_DIR
 Package added: $DEB_FILE
 
 Next steps:
-1. Host '$REPO_DIR' over HTTPS.
+1. Host '$REPO_DIR' over HTTPS (recommended), or use file:$REPO_DIR locally.
 2. On client machine:
-   sudo install -d -m 0755 /usr/share/keyrings
-   curl -fsSL <REPO_URL>/keyrings/pixie-archive-keyring.gpg | sudo tee /usr/share/keyrings/pixie-archive-keyring.gpg >/dev/null
-   echo "deb [signed-by=/usr/share/keyrings/pixie-archive-keyring.gpg] <REPO_URL> $DIST $COMPONENT" | sudo tee /etc/apt/sources.list.d/pixie.list
-   sudo apt update
-   sudo apt install pixie
+   ./scripts/apt/configure-client.sh <REPO_URL> $DIST $COMPONENT
 EOF

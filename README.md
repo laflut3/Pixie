@@ -2,77 +2,36 @@
 
 Serveur HTTP en Rust.
 
-## Installation 1: paquet `.deb` local (bare-metal Debian/Ubuntu)
+## Installation rapide (machine cliente)
 
-Depuis la racine du repo (`Pixie/`):
+1. Configurer le depot APT Pixie:
+
+```bash
+./scripts/apt/configure-client.sh https://repo.example.org/pixie bookworm main
+```
+
+`repo.example.org` est un exemple. Remplace-le par ton vrai domaine.
+
+2. Installer Pixie:
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential debhelper devscripts cargo rustc
-dpkg-buildpackage -us -uc -b
-sudo apt install -y ../pixie_0.1.0-2_amd64.deb
+sudo apt install -y pixie
 ```
 
-Verifier l'installation:
+Le service `pixie` est demarre automatiquement et active au boot.
+
+## Mettre a jour Pixie
 
 ```bash
-dpkg -L pixie
+sudo apt update
+sudo apt install --only-upgrade -y pixie
 ```
 
-Le paquet installe un service systemd `pixie` qui:
-- demarre automatiquement apres l'installation,
-- demarre automatiquement au boot.
-
-Verifier le service:
+## Verifier le service et les logs
 
 ```bash
 sudo systemctl status pixie
-```
-
-Voir les logs:
-
-```bash
 pixie log
 pixie log -f
-```
-
-Donner le droit de bind sur `:80` sans root:
-
-```bash
-sudo apt install -y libcap2-bin
-sudo setcap 'cap_net_bind_service=+ep' /usr/bin/pixie
-```
-
-## Installation 2: `apt install pixie` via depot APT
-
-### 2.1 Publier le depot (machine publisher)
-
-```bash
-sudo apt update
-sudo apt install -y build-essential debhelper devscripts rustc cargo reprepro gnupg
-gpg --full-generate-key
-gpg --list-keys --keyid-format LONG
-GPG_KEY_ID=<KEY_ID> DIST=bookworm COMPONENT=main ./scripts/apt/publish-repo.sh
-```
-
-Puis heberger le dossier `apt-repo/` en HTTPS.
-
-### 2.2 Installer depuis une machine cliente
-
-Avec le script:
-
-```bash
-./scripts/apt/configure-client.sh https://packages.example.com/pixie bookworm main
-```
-
-Ou manuellement:
-
-```bash
-sudo install -d -m 0755 /usr/share/keyrings
-curl -fsSL https://packages.example.com/pixie/keyrings/pixie-archive-keyring.gpg \
-  | sudo tee /usr/share/keyrings/pixie-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/pixie-archive-keyring.gpg] https://packages.example.com/pixie bookworm main" \
-  | sudo tee /etc/apt/sources.list.d/pixie.list
-sudo apt update
-sudo apt install -y pixie
 ```
