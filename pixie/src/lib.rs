@@ -1,4 +1,5 @@
 pub struct ThreadPool;
+
 #[derive(Debug)]
 pub struct PoolCreationError;
 
