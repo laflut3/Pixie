@@ -8,10 +8,10 @@ use std::{
 use pixie::ThreadPool;
 
 fn main() -> io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:7878")?;
+    let listener = TcpListener::bind("127.0.0.1:80")?;
     let pool = ThreadPool::new(4);
 
-    for stream in listener.incoming().take(2) {
+    for stream in listener.incoming() {
         let stream = match stream {
             Ok(stream) => stream,
             Err(err) => {
@@ -27,7 +27,6 @@ fn main() -> io::Result<()> {
         });
     }
 
-    println!("Shutting down.");
     Ok(())
 }
 
