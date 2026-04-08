@@ -17,7 +17,9 @@ impl Worker {
                 let message = match receiver.lock() {
                     Ok(guard) => guard.recv(),
                     Err(_) => {
-                        eprintln!("[pixie][error] worker {id} receiver lock poisoned; shutting down");
+                        eprintln!(
+                            "[pixie][error] worker {id} receiver lock poisoned; shutting down"
+                        );
                         break;
                     }
                 };
@@ -41,10 +43,10 @@ impl Worker {
     }
 
     pub(super) fn join(&mut self) {
-        if let Some(thread) = self.thread.take() {
-            if let Err(err) = thread.join() {
-                eprintln!("[pixie][error] worker {} panicked: {:?}", self.id, err);
-            }
+        if let Some(thread) = self.thread.take()
+            && let Err(err) = thread.join()
+        {
+            eprintln!("[pixie][error] worker {} panicked: {:?}", self.id, err);
         }
     }
 }

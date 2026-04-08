@@ -1,6 +1,4 @@
-use std::{
-    fmt
-};
+use std::fmt;
 
 pub fn log_info(args: fmt::Arguments<'_>) {
     eprintln!("[pixie][info] {args}");

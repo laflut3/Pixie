@@ -15,6 +15,7 @@ fn main() -> io::Result<()> {
     match args.next().as_deref() {
         None | Some("serve") => {
             let addr = server_addr();
+
             let pool_size = match pool_size() {
                 Ok(size) => size,
                 Err(err) => {
@@ -22,6 +23,7 @@ fn main() -> io::Result<()> {
                     process::exit(2);
                 }
             };
+
             run_server(&addr, pool_size)
         }
         Some("log") | Some("logs") => {

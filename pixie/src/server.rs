@@ -1,17 +1,12 @@
 use std::{
-    env,
-    fs,
+    env, fs,
     io::{self, BufReader, prelude::*},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     sync::Arc,
 };
 
-use super::{
-    log_info,
-    log_warn,
-    log_error
-};
+use super::{log_error, log_info, log_warn};
 
 use crate::ThreadPool;
 
@@ -56,7 +51,7 @@ fn resolve_web_root() -> PathBuf {
             let candidate = PathBuf::from(trimmed);
             if candidate.is_dir() {
                 return candidate;
-        }
+            }
             log_warn(format_args!(
                 "PIXIE_WEB_ROOT='{}' is not a directory, using fallback",
                 candidate.display()
