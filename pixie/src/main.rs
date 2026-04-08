@@ -1,4 +1,5 @@
 use std::{
+    env,
     fs,
     io::{self, BufReader, prelude::*},
     net::{TcpListener, TcpStream},
@@ -30,7 +31,27 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn add_path(request_line: String) -> PathBuf {
+fn web_root() -> PathBuf {
+    if let Ok(path) = env::var("PIXIE_WEB_ROOT") {
+        let candidate = PathBuf::from(path);
+        if candidate.exists() {
+            return candidate;
+        }
+    }
+
+    let dev_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web");
+    if dev_root.exists() {
+        return dev_root;
+    }
+
+    PathBuf::from("/usr/share/pixie/web")
+}
+
+fn not_found_path() -> PathBuf {
+    web_root().join("404.html")
+}
+
+fn add_path(request_line: &str) -> PathBuf {
     let path = request_line
         .split_whitespace()
         .nth(1)
@@ -40,15 +61,14 @@ fn add_path(request_line: String) -> PathBuf {
         .next()
         .unwrap_or("");
 
+    let root = web_root();
     let html_path = if path.is_empty() {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/hello.html")
+        root.join("hello.html")
     } else {
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../web")
-            .join(format!("{path}.html"))
+        root.join(format!("{path}.html"))
     };
 
-    return html_path;
+    html_path
 }
 
 fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
@@ -60,16 +80,15 @@ fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
 
     let (mut status_line, mut filename) = if request_line.starts_with("GET /") {
         let status = "HTTP/1.1 200 OK";
-        let html_path = add_path(request_line);
+        let html_path = add_path(&request_line);
         (status, html_path)
     } else {
-        let error_page = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/404.html");
-        ("HTTP/1.1 404 NOT FOUND", error_page)
+        ("HTTP/1.1 404 NOT FOUND", not_found_path())
     };
 
     if !filename.exists() {
         status_line = "HTTP/1.1 404 NOT FOUND";
-        filename = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/404.html");
+        filename = not_found_path();
     }
 
     let contents = fs::read_to_string(filename)?;
