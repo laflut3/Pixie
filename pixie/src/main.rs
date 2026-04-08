@@ -5,11 +5,18 @@ use std::{
 
 use pixie::run_server;
 
+const DEFAULT_ADDR: &str = "127.0.0.1:80";
+const DEFAULT_THREADS: usize = 4;
+
 fn main() -> io::Result<()> {
     let mut args = env::args().skip(1);
 
     match args.next().as_deref() {
-        None | Some("serve") => run_server("127.0.0.1:80", 4),
+        None | Some("serve") => {
+            let addr = server_addr();
+            let pool_size = pool_size();
+            run_server(&addr, pool_size)
+        }
         Some("log") | Some("logs") => {
             let extra_args: Vec<String> = args.collect();
             show_logs(&extra_args)
@@ -20,6 +27,29 @@ fn main() -> io::Result<()> {
             eprintln!("  pixie log [journalctl options]");
             process::exit(2);
         }
+    }
+}
+
+fn server_addr() -> String {
+    match env::var("PIXIE_ADDR") {
+        Ok(value) if !value.trim().is_empty() => value,
+        _ => DEFAULT_ADDR.to_string(),
+    }
+}
+
+fn pool_size() -> usize {
+    match env::var("PIXIE_THREADS") {
+        Ok(value) => match value.parse::<usize>() {
+            Ok(size) if size > 0 => size,
+            _ => {
+                eprintln!(
+                    "Invalid PIXIE_THREADS='{value}', using default {}",
+                    DEFAULT_THREADS
+                );
+                DEFAULT_THREADS
+            }
+        },
+        Err(_) => DEFAULT_THREADS,
     }
 }
 

@@ -1,0 +1,9 @@
+.git
+.github
+.codex
+apt-repo
+debian
+pixie/target
+**/*.deb
+**/*.buildinfo
+**/*.changes

@@ -42,3 +42,31 @@ Option (sans `sudo`, si ton user est dans `adm` ou `systemd-journal`):
 pixie log -q
 pixie log -q -f
 ```
+
+## Deploiement Docker
+
+Construire l'image localement:
+
+```bash
+docker build -t pixie:local .
+docker run --rm -p 8080:8080 pixie:local
+```
+
+Puis ouvrir:
+
+`http://localhost:8080`
+
+Image publiee (GitHub Container Registry):
+
+`ghcr.io/<owner>/<repo>:latest`
+
+Utiliser une image publiee:
+
+```bash
+docker pull ghcr.io/<owner>/<repo>:latest
+docker run --rm -p 8080:8080 ghcr.io/<owner>/<repo>:latest
+```
+
+Variables utiles:
+- `PIXIE_ADDR` (defaut image Docker: `0.0.0.0:8080`)
+- `PIXIE_THREADS` (defaut: `4`)

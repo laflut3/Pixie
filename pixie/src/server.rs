@@ -11,6 +11,7 @@ use crate::ThreadPool;
 pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
     let listener = TcpListener::bind(addr)?;
     let pool = ThreadPool::new(pool_size);
+    eprintln!("Pixie listening on {addr} with {pool_size} workers");
 
     for stream in listener.incoming() {
         let stream = match stream {
