@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex, mpsc};
 
-use super::{error::PoolCreationError, job::Job, worker::Worker};
+use super::{job::Job, worker::Worker};
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
@@ -11,12 +11,8 @@ impl ThreadPool {
     /// Create a new ThreadPool.
     ///
     /// The size is the number of threads in the pool.
-    ///
-    /// # Panics
-    ///
-    /// The `new` function will panic if the size is zero.
     pub fn new(size: usize) -> ThreadPool {
-        assert!(size > 0);
+        assert!(size > 0, "thread pool size must be greater than zero");
 
         let (sender, receiver) = mpsc::channel();
         let receiver = Arc::new(Mutex::new(receiver));
@@ -32,14 +28,6 @@ impl ThreadPool {
         }
     }
 
-    pub fn build(size: usize) -> Result<ThreadPool, PoolCreationError> {
-        if size > 0 {
-            Ok(ThreadPool::new(size))
-        } else {
-            Err(PoolCreationError)
-        }
-    }
-
     pub fn execute<F>(&self, f: F)
     where
         F: FnOnce() + Send + 'static,
@@ -49,11 +37,11 @@ impl ThreadPool {
         match &self.sender {
             Some(sender) => {
                 if let Err(err) = sender.send(job) {
-                    eprintln!("Failed to send job to worker: {err}");
+                    eprintln!("[pixie][error] failed to send job to worker: {err}");
                 }
             }
             None => {
-                eprintln!("Thread pool has been shut down; rejecting new job.");
+                eprintln!("[pixie][warn] thread pool is shut down; rejecting new job");
             }
         }
     }
