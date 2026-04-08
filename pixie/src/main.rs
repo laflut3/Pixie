@@ -1,6 +1,6 @@
 use std::{env, io, process};
 
-use pixie::{pool_size, run_server, server_addr, show_logs};
+use pixie::{log_error, log_info, pool_size, run_server, server_addr, show_logs};
 
 const USAGE: &str = "Usage:\n  pixie serve\n  pixie log [journalctl options]";
 
@@ -14,7 +14,7 @@ fn main() -> io::Result<()> {
             let pool_size = match pool_size() {
                 Ok(size) => size,
                 Err(err) => {
-                    eprintln!("[pixie][error] {err}");
+                    log_error("[pixie][error] {err}");
                     process::exit(2);
                 }
             };
@@ -26,8 +26,8 @@ fn main() -> io::Result<()> {
             show_logs(&extra_args)
         }
         Some(command) => {
-            eprintln!("[pixie][error] unknown command: {command}");
-            eprintln!("{USAGE}");
+            log_error!("[pixie][error] unknown command: {command}");
+            log_info("{USAGE}");
             process::exit(2);
         }
     }
