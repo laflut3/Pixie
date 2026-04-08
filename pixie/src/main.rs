@@ -11,23 +11,23 @@ fn main() -> io::Result<()> {
         None | Some("serve") => {
             let addr = server_addr();
 
-            let pool_size = match pool_size() {
+            let worker_count = match pool_size() {
                 Ok(size) => size,
                 Err(err) => {
-                    log_error("[pixie][error] {err}");
+                    log_error(format_args!("{err}"));
                     process::exit(2);
                 }
             };
 
-            run_server(&addr, pool_size)
+            run_server(&addr, worker_count)
         }
         Some("log") | Some("logs") => {
             let extra_args: Vec<String> = args.collect();
             show_logs(&extra_args)
         }
         Some(command) => {
-            log_error!("[pixie][error] unknown command: {command}");
-            log_info("{USAGE}");
+            log_error(format_args!("unknown command: {command}"));
+            log_info(format_args!("{USAGE}"));
             process::exit(2);
         }
     }
