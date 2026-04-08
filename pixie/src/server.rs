@@ -1,6 +1,5 @@
 use std::{
     env,
-    fmt,
     fs,
     io::{self, BufReader, prelude::*},
     net::{TcpListener, TcpStream},
@@ -18,6 +17,7 @@ pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
     let listener = TcpListener::bind(addr)?;
     let pool = ThreadPool::new(pool_size);
     let web_root = Arc::new(resolve_web_root());
+
     log_info(format_args!(
         "listening on {addr} with {pool_size} workers (web_root={})",
         web_root.display()
@@ -112,16 +112,4 @@ fn resolve_route(request_line: &str, web_root: &Path) -> (&'static str, PathBuf)
     } else {
         not_found()
     }
-}
-
-fn log_info(args: fmt::Arguments<'_>) {
-    eprintln!("[pixie][info] {args}");
-}
-
-fn log_warn(args: fmt::Arguments<'_>) {
-    eprintln!("[pixie][warn] {args}");
-}
-
-fn log_error(args: fmt::Arguments<'_>) {
-    eprintln!("[pixie][error] {args}");
 }
