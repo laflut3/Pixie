@@ -2,14 +2,15 @@ use std::{
     fs,
     io::{self, BufReader, prelude::*},
     net::{TcpListener, TcpStream},
-    path::{Path},
+    path::Path,
     sync::Arc,
 };
 
-use super::{log_info, log_warn, log_error};
-use super::{resolve_route, resolve_web_root};
-
-use crate::ThreadPool;
+use crate::{
+    ThreadPool,
+    logger::{log_error, log_info, log_warn},
+    router::{resolve_route, resolve_web_root},
+};
 
 pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
     let listener = TcpListener::bind(addr)?;
@@ -31,6 +32,7 @@ pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
         };
 
         let web_root = Arc::clone(&web_root);
+
         pool.execute(move || {
             if let Err(err) = handle_connection(stream, web_root.as_path()) {
                 log_error(format_args!("failed to handle connection: {err}"));
@@ -59,4 +61,3 @@ fn handle_connection(mut stream: TcpStream, web_root: &Path) -> io::Result<()> {
     stream.write_all(response.as_bytes())?;
     Ok(())
 }
-

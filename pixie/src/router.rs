@@ -3,7 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::{log_warn};
+use crate::logger::log_warn;
 
 const DEFAULT_WEB_ROOT: &str = "/usr/share/pixie/web";
 const INDEX_PAGE: &str = "hello.html";
@@ -12,7 +12,7 @@ const NOT_FOUND_PAGE: &str = "404.html";
 pub fn resolve_web_root() -> PathBuf {
     if let Ok(path) = env::var("PIXIE_WEB_ROOT") {
         let trimmed = path.trim();
-        
+
         if !trimmed.is_empty() {
             let candidate = PathBuf::from(trimmed);
             if candidate.is_dir() {
