@@ -1,0 +1,15 @@
+Source: pixie
+Section: web
+Priority: optional
+Maintainer: Léo Torres <ltorres@localhost>
+Build-Depends: debhelper-compat (= 13), cargo, rustc
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+
+Package: pixie
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Serveur HTTP minimal en Rust
+ Pixie est un serveur HTTP didactique en Rust.
+ Ce paquet installe le binaire `pixie` et ses pages web statiques
+ sous `/usr/share/pixie/web`.

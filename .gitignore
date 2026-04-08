@@ -21,3 +21,19 @@ target
 #.idea/
 
 *.codex
+
+# Debian packaging artifacts (dpkg-buildpackage / debhelper)
+pixie_*.deb
+pixie_*.udeb
+pixie_*.buildinfo
+pixie_*.changes
+pixie_*.dsc
+pixie_*.tar.*
+
+debian/.debhelper/
+debian/debhelper-build-stamp
+debian/files
+debian/tmp/
+debian/pixie/
+debian/*.debhelper.log
+debian/*.substvars

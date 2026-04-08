@@ -1,0 +1,5 @@
+pixie (0.1.0-1) unstable; urgency=medium
+
+  * Initial Debian packaging.
+
+ -- Léo Torres <ltorres@localhost>  Wed, 08 Apr 2026 14:33:22 +0200

@@ -1,0 +1,2 @@
+pixie/target/release/pixie usr/bin/
+web/*.html usr/share/pixie/web/
