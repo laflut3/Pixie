@@ -1,25 +1,34 @@
 use std::{
     fs,
-    io::{BufReader, prelude::*},
+    io::{self, BufReader, prelude::*},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
 };
 
 use pixie::ThreadPool;
 
-fn main() {
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+fn main() -> io::Result<()> {
+    let listener = TcpListener::bind("127.0.0.1:7878")?;
     let pool = ThreadPool::new(4);
 
     for stream in listener.incoming().take(2) {
-        let stream = stream.unwrap();
+        let stream = match stream {
+            Ok(stream) => stream,
+            Err(err) => {
+                eprintln!("Connection failed: {err}");
+                continue;
+            }
+        };
 
-        pool.execute(|| {
-            handle_connection(stream);
+        pool.execute(move || {
+            if let Err(err) = handle_connection(stream) {
+                eprintln!("Failed to handle connection: {err}");
+            }
         });
     }
 
     println!("Shutting down.");
+    Ok(())
 }
 
 fn add_path(request_line: String) -> PathBuf {
@@ -44,9 +53,12 @@ fn add_path(request_line: String) -> PathBuf {
     return html_path
 }
 
-fn handle_connection(mut stream: TcpStream) {
+fn handle_connection(mut stream: TcpStream) -> io::Result<()> {
     let buf_reader = BufReader::new(&stream);
-    let request_line = buf_reader.lines().next().unwrap().unwrap();
+    let request_line = match buf_reader.lines().next().transpose()? {
+        Some(line) => line,
+        None => return Ok(()),
+    };
     
     let (mut status_line, mut filename) = if request_line.starts_with("GET /") {
         let status = "HTTP/1.1 200 OK";
@@ -62,11 +74,12 @@ fn handle_connection(mut stream: TcpStream) {
         filename = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web/404.html");
     }
 
-    let contents = fs::read_to_string(filename).unwrap();
+    let contents = fs::read_to_string(filename)?;
     let length = contents.len();
 
     let response =
         format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
-    stream.write_all(response.as_bytes()).unwrap();
+    stream.write_all(response.as_bytes())?;
+    Ok(())
 }

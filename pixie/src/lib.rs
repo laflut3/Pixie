@@ -54,7 +54,16 @@ impl ThreadPool {
     {
         let job = Box::new(f);
 
-        self.sender.as_ref().unwrap().send(job).unwrap();
+        match &self.sender {
+            Some(sender) => {
+                if let Err(err) = sender.send(job) {
+                    eprintln!("Failed to send job to worker: {err}");
+                }
+            }
+            None => {
+                eprintln!("Thread pool has been shut down; rejecting new job.");
+            }
+        }
     }
 }
 
@@ -66,7 +75,9 @@ impl Drop for ThreadPool {
             println!("Shutting down worker {}", worker.id);
 
             if let Some(thread) = worker.thread.take() {
-                thread.join().unwrap();
+                if let Err(err) = thread.join() {
+                    eprintln!("Worker {} panicked: {:?}", worker.id, err);
+                }
             }
         }
     }
@@ -81,7 +92,13 @@ impl Worker {
     fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
         let thread = thread::spawn(move || {
             loop {
-                let message = receiver.lock().unwrap().recv();
+                let message = match receiver.lock() {
+                    Ok(guard) => guard.recv(),
+                    Err(_) => {
+                        eprintln!("Worker {id} receiver lock poisoned; shutting down.");
+                        break;
+                    }
+                };
 
                 match message {
                     Ok(job) => {

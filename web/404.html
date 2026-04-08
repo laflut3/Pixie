@@ -1,11 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Hello!</title>
-  </head>
-  <body>
-    <h1>Oops!</h1>
-    <p>Sorry, I don't know what you're asking for.</p>
-  </body>
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 - Page introuvable</title>
+  <style>
+    :root {
+      --bg-top: #fff2d8;
+      --bg-bottom: #d6ecff;
+      --card: #ffffffcc;
+      --text: #2e3440;
+      --muted: #5d6775;
+      --accent: #e07a28;
+      --accent-hover: #c76314;
+      --ring: #19416622;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--text);
+      font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, #ffffffaa 0 14%, transparent 15%),
+        radial-gradient(circle at 88% 78%, #ffffffaa 0 12%, transparent 13%),
+        linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
+    }
+
+    .card {
+      width: min(720px, 100%);
+      border: 1px solid #ffffff;
+      border-radius: 24px;
+      background: var(--card);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 20px 50px var(--ring);
+      padding: clamp(24px, 5vw, 48px);
+      animation: rise 600ms ease-out;
+    }
+
+    .code {
+      margin: 0 0 8px;
+      font-size: clamp(3rem, 12vw, 6rem);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: #1f2b38;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: reveal 500ms ease-out 120ms forwards;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+      opacity: 0;
+      transform: translateY(12px);
+      animation: reveal 500ms ease-out 220ms forwards;
+    }
+
+    p {
+      margin: 14px 0 28px;
+      max-width: 45ch;
+      line-height: 1.6;
+      color: var(--muted);
+      opacity: 0;
+      transform: translateY(12px);
+      animation: reveal 500ms ease-out 320ms forwards;
+    }
+
+    .cta {
+      display: inline-block;
+      text-decoration: none;
+      font-weight: 700;
+      color: #ffffff;
+      background: var(--accent);
+      border-radius: 12px;
+      padding: 12px 18px;
+      transition: transform 160ms ease, background-color 160ms ease;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: reveal 500ms ease-out 420ms forwards;
+    }
+
+    .cta:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    @keyframes rise {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes reveal {
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="code">404</p>
+    <h1>Cette page n'existe pas</h1>
+    <p>L'adresse demandee est introuvable. Verifie l'URL ou retourne a l'accueil pour continuer.</p>
+    <a class="cta" href="/">Retour a l'accueil</a>
+  </main>
+</body>
 </html>
