@@ -1,18 +1,15 @@
 use std::{
-    env, fs,
+    fs,
     io::{self, BufReader, prelude::*},
     net::{TcpListener, TcpStream},
-    path::{Path, PathBuf},
+    path::{Path},
     sync::Arc,
 };
 
-use super::{log_error, log_info, log_warn};
+use super::{log_info, log_warn, log_error};
+use super::{resolve_route, resolve_web_root};
 
 use crate::ThreadPool;
-
-const DEFAULT_WEB_ROOT: &str = "/usr/share/pixie/web";
-const INDEX_PAGE: &str = "hello.html";
-const NOT_FOUND_PAGE: &str = "404.html";
 
 pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
     let listener = TcpListener::bind(addr)?;
@@ -44,29 +41,6 @@ pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
     Ok(())
 }
 
-fn resolve_web_root() -> PathBuf {
-    if let Ok(path) = env::var("PIXIE_WEB_ROOT") {
-        let trimmed = path.trim();
-        if !trimmed.is_empty() {
-            let candidate = PathBuf::from(trimmed);
-            if candidate.is_dir() {
-                return candidate;
-            }
-            log_warn(format_args!(
-                "PIXIE_WEB_ROOT='{}' is not a directory, using fallback",
-                candidate.display()
-            ));
-        }
-    }
-
-    let dev_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web");
-    if dev_root.is_dir() {
-        return dev_root;
-    }
-
-    PathBuf::from(DEFAULT_WEB_ROOT)
-}
-
 fn handle_connection(mut stream: TcpStream, web_root: &Path) -> io::Result<()> {
     let buf_reader = BufReader::new(&stream);
     let request_line = match buf_reader.lines().next().transpose()? {
@@ -86,31 +60,3 @@ fn handle_connection(mut stream: TcpStream, web_root: &Path) -> io::Result<()> {
     Ok(())
 }
 
-fn resolve_route(request_line: &str, web_root: &Path) -> (&'static str, PathBuf) {
-    let not_found = || ("HTTP/1.1 404 NOT FOUND", web_root.join(NOT_FOUND_PAGE));
-
-    if !request_line.starts_with("GET /") {
-        return not_found();
-    }
-
-    let route = request_line
-        .split_whitespace()
-        .nth(1)
-        .unwrap_or("/")
-        .trim_start_matches('/')
-        .split('?')
-        .next()
-        .unwrap_or("");
-
-    let file = if route.is_empty() {
-        web_root.join(INDEX_PAGE)
-    } else {
-        web_root.join(format!("{route}.html"))
-    };
-
-    if file.is_file() {
-        ("HTTP/1.1 200 OK", file)
-    } else {
-        not_found()
-    }
-}
