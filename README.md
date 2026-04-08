@@ -10,13 +10,30 @@ Depuis la racine du repo (`Pixie/`):
 sudo apt update
 sudo apt install -y build-essential debhelper devscripts cargo rustc
 dpkg-buildpackage -us -uc -b
-sudo apt install -y ../pixie_0.1.0-1_amd64.deb
+sudo apt install -y ../pixie_0.1.0-2_amd64.deb
 ```
 
 Verifier l'installation:
 
 ```bash
 dpkg -L pixie
+```
+
+Le paquet installe un service systemd `pixie` qui:
+- demarre automatiquement apres l'installation,
+- demarre automatiquement au boot.
+
+Verifier le service:
+
+```bash
+sudo systemctl status pixie
+```
+
+Voir les logs:
+
+```bash
+pixie log
+pixie log -f
 ```
 
 Donner le droit de bind sur `:80` sans root:

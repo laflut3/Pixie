@@ -1,3 +1,10 @@
+pixie (0.1.0-2) unstable; urgency=medium
+
+  * Add systemd unit so pixie starts automatically after install and at boot.
+  * Add `pixie log` command to read service logs from journald.
+
+ -- Léo Torres <ltorres@localhost>  Wed, 08 Apr 2026 15:48:00 +0200
+
 pixie (0.1.0-1) unstable; urgency=medium
 
   * Initial Debian packaging.

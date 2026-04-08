@@ -1,0 +1,13 @@
+[Unit]
+Description=Pixie HTTP server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/pixie serve
+Restart=on-failure
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
