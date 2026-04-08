@@ -112,6 +112,55 @@ Puis lancer:
 Note: si un cluster local (ex: k3s) redirige deja le port 80 via iptables/nft,
 les requetes HTTP peuvent etre captees avant d'arriver a Pixie.
 
+## Installation Via `apt install pixie` (repository APT)
+
+Pour installer sur n'importe quelle machine Debian/Ubuntu avec `apt install pixie`,
+il faut publier un repository APT signe.
+
+### 1) Construire et publier le repository (machine publisher)
+
+Prerequis:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential debhelper devscripts rustc cargo reprepro gnupg
+```
+
+Generer une cle GPG dediee au repo (une seule fois):
+
+```bash
+gpg --full-generate-key
+gpg --list-keys --keyid-format LONG
+```
+
+Publier le paquet dans un repo local (`apt-repo/`):
+
+```bash
+GPG_KEY_ID=<KEY_ID> DIST=bookworm COMPONENT=main ./scripts/apt/publish-repo.sh
+```
+
+Ensuite, heberger le dossier `apt-repo/` en HTTPS (Nginx, S3, GitHub Pages, etc.).
+
+### 2) Installer depuis une machine cliente
+
+Avec le script fourni:
+
+```bash
+./scripts/apt/configure-client.sh https://packages.example.com/pixie bookworm main
+```
+
+Ou manuellement:
+
+```bash
+sudo install -d -m 0755 /usr/share/keyrings
+curl -fsSL https://packages.example.com/pixie/keyrings/pixie-archive-keyring.gpg \
+  | sudo tee /usr/share/keyrings/pixie-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/pixie-archive-keyring.gpg] https://packages.example.com/pixie bookworm main" \
+  | sudo tee /etc/apt/sources.list.d/pixie.list
+sudo apt update
+sudo apt install -y pixie
+```
+
 ## Licence
 
 Ce projet est distribue sous licence MIT. Voir le fichier `LICENSE`.
