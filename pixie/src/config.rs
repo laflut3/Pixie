@@ -57,10 +57,7 @@ fn load_file_config() -> io::Result<Option<FileConfig>> {
 }
 
 fn env_config_path() -> Option<String> {
-    env::var(CONFIG_ENV_VAR)
-        .ok()
-        .map(|value| value.trim().to_string())
-        .filter(|value| !value.is_empty())
+    env_trimmed(CONFIG_ENV_VAR)
 }
 
 fn read_config_if_exists(path: &str) -> io::Result<Option<FileConfig>> {
@@ -83,24 +80,17 @@ fn read_config_if_exists(path: &str) -> io::Result<Option<FileConfig>> {
 fn file_addr(config: Option<&FileConfig>) -> Option<String> {
     let config = config?;
 
-    if let Some(addr) = clean(&config.addr) {
-        return Some(addr.to_string());
-    }
-
-    if config.host.is_some() || config.port.is_some() {
-        let host = clean(&config.host).unwrap_or(DEFAULT_HOST);
-        let port = config.port.unwrap_or(DEFAULT_PORT);
-        return Some(format!("{host}:{port}"));
-    }
-
-    None
+    clean(&config.addr).map(str::to_owned).or_else(|| {
+        (config.host.is_some() || config.port.is_some()).then(|| {
+            let host = clean(&config.host).unwrap_or(DEFAULT_HOST);
+            let port = config.port.unwrap_or(DEFAULT_PORT);
+            format!("{host}:{port}")
+        })
+    })
 }
 
 fn env_addr() -> Option<String> {
-    env::var("PIXIE_ADDR")
-        .ok()
-        .map(|value| value.trim().to_string())
-        .filter(|value| !value.is_empty())
+    env_trimmed("PIXIE_ADDR")
 }
 
 fn env_workers() -> Option<usize> {
@@ -118,4 +108,11 @@ fn clean(value: &Option<String>) -> Option<&str> {
         .as_deref()
         .map(str::trim)
         .filter(|trimmed| !trimmed.is_empty())
+}
+
+fn env_trimmed(key: &str) -> Option<String> {
+    env::var(key)
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
 }

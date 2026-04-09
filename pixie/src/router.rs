@@ -36,18 +36,9 @@ pub fn resolve_web_root() -> PathBuf {
 pub fn resolve_route(request_line: &str, web_root: &Path) -> (&'static str, PathBuf) {
     let not_found = || ("HTTP/1.1 404 NOT FOUND", web_root.join(NOT_FOUND_PAGE));
 
-    if !request_line.starts_with("GET /") {
+    let Some(route) = extract_route(request_line) else {
         return not_found();
-    }
-
-    let route = request_line
-        .split_whitespace()
-        .nth(1)
-        .unwrap_or("/")
-        .trim_start_matches('/')
-        .split('?')
-        .next()
-        .unwrap_or("");
+    };
 
     let file = if route.is_empty() {
         web_root.join(INDEX_PAGE)
@@ -60,4 +51,17 @@ pub fn resolve_route(request_line: &str, web_root: &Path) -> (&'static str, Path
     } else {
         not_found()
     }
+}
+
+fn extract_route(request_line: &str) -> Option<&str> {
+    let mut parts = request_line.split_whitespace();
+    let method = parts.next()?;
+    let target = parts.next()?;
+
+    if method != "GET" || !target.starts_with('/') {
+        return None;
+    }
+
+    let path = target.split_once('?').map_or(target, |(path, _)| path);
+    Some(path.trim_start_matches('/'))
 }
