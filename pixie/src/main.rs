@@ -1,6 +1,6 @@
 use std::{env, io, process};
 
-use pixie::{log_error, log_info, pool_size, run_server, server_addr, show_logs};
+use pixie::{log_error, log_info, run_server, runtime_config, show_logs};
 
 const USAGE: &str = "Usage:\n  pixie serve\n  pixie log [journalctl options]";
 
@@ -9,17 +9,15 @@ fn main() -> io::Result<()> {
 
     match args.next().as_deref() {
         None | Some("serve") => {
-            let addr = server_addr();
-
-            let worker_count = match pool_size() {
-                Ok(size) => size,
+            let config = match runtime_config() {
+                Ok(config) => config,
                 Err(err) => {
                     log_error(format_args!("{err}"));
                     process::exit(2);
                 }
             };
 
-            run_server(&addr, worker_count)
+            run_server(&config.addr, config.workers)
         }
         Some("log") | Some("logs") => {
             let extra_args: Vec<String> = args.collect();

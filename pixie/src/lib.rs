@@ -6,8 +6,8 @@ pub mod server;
 pub mod threadpool;
 
 pub use crate::cli::show_logs;
-pub use crate::config::pool_size;
-pub use crate::config::server_addr;
+pub use crate::config::RuntimeConfig;
+pub use crate::config::runtime_config;
 pub use crate::logger::log_error;
 pub use crate::logger::log_info;
 pub use crate::logger::log_warn;
