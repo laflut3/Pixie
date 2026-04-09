@@ -1,3 +1,9 @@
+pixie (1.0.0-1) unstable; urgency=medium
+
+  * Prepare 1.0.0-1 Debian package release.
+
+ -- Léo Torres <ltorres@localhost>  Thu, 09 Apr 2026 10:11:34 +0200
+
 pixie (0.1.0-2) unstable; urgency=medium
 
   * Add systemd unit so pixie starts automatically after install and at boot.
