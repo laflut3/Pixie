@@ -43,6 +43,38 @@ pixie log -q
 pixie log -q -f
 ```
 
+## Configuration Pixie (`config-pixie.yml`)
+
+Chemin recommande en installation systeme (meme logique que nginx):
+
+`/etc/pixie/config-pixie.yml`
+
+Pour le developpement local, `./config-pixie.yml` est aussi supporte.
+
+Exemple:
+
+```yml
+host: 127.0.0.1
+port: 80
+nb_worker: 4
+```
+
+Champs supportes:
+- `host` (ex: `127.0.0.1`)
+- `port` (ex: `8080`)
+- `nb_worker` (alias: `workers`)
+- `addr` (optionnel, prioritaire sur `host` + `port`, ex: `0.0.0.0:8080`)
+
+Ordre de resolution:
+1. `PIXIE_CONFIG` (chemin de fichier explicite)
+2. `/etc/pixie/config-pixie.yml`
+3. `./config-pixie.yml`
+4. Variables d'environnement (`PIXIE_ADDR`, `PIXIE_THREADS`)
+5. Valeurs par defaut
+
+Guide complet (Docker, Kubernetes, APT):
+[doc/configuration.md](/home/ltorres/perso/Pixie/doc/configuration.md)
+
 ## Deploiement Docker
 
 Construire l'image localement:
