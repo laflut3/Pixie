@@ -58,6 +58,10 @@ Important:
 
 Le script configure la cle, ajoute la source APT, installe `pixie` et active le service.
 
+Configuration apres installation (comme nginx sous `/etc`):
+
+`/etc/pixie/config-pixie.yml`
+
 ## 5. Cote client: recuperer une mise a jour Pixie
 
 Quand une nouvelle version est publiee:
