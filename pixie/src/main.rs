@@ -1,8 +1,8 @@
 use std::{env, io, process};
 
-use pixie::{log_error, log_info, run_server, runtime_config, show_logs};
+use pixie::{log_error, log_info, run_server, runtime_config};
 
-const USAGE: &str = "Usage:\n  pixie serve\n  pixie log [journalctl options]";
+const USAGE: &str = "Usage:\n  pixie serve";
 
 fn main() -> io::Result<()> {
     let mut args = env::args().skip(1);
@@ -18,10 +18,6 @@ fn main() -> io::Result<()> {
             };
 
             run_server(&config.addr, config.workers)
-        }
-        Some("log") | Some("logs") => {
-            let extra_args: Vec<String> = args.collect();
-            show_logs(&extra_args)
         }
         Some(command) => {
             log_error(format_args!("unknown command: {command}"));

@@ -75,7 +75,7 @@ Verifier:
 
 ```bash
 sudo systemctl status pixie
-pixie log -f
+sudo journalctl -u pixie.service -f
 ```
 
 ## 6. Checks utiles en cas de probleme

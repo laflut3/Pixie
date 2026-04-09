@@ -1,11 +1,9 @@
-pub mod cli;
 pub mod config;
 pub mod logger;
 pub mod router;
 pub mod server;
 pub mod threadpool;
 
-pub use crate::cli::show_logs;
 pub use crate::config::RuntimeConfig;
 pub use crate::config::runtime_config;
 pub use crate::logger::log_error;

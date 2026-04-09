@@ -36,13 +36,6 @@ sudo journalctl -u pixie.service -n 100 --no-pager
 sudo journalctl -u pixie.service -f
 ```
 
-Option (sans `sudo`, si ton user est dans `adm` ou `systemd-journal`):
-
-```bash
-pixie log -q
-pixie log -q -f
-```
-
 ## Configuration Pixie (`config-pixie.yml`)
 
 Chemin recommande en installation systeme (meme logique que nginx):
