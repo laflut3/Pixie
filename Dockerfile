@@ -12,7 +12,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system pixie \
-    && useradd --system --gid pixie --no-create-home pixie
+    && useradd --system --gid pixie --no-create-home pixie \
+    && mkdir -p /etc/pixie
 
 COPY --from=builder /app/pixie/target/release/pixie /usr/local/bin/pixie
 COPY web /usr/share/pixie/web
