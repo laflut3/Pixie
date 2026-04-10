@@ -26,6 +26,7 @@ pub fn resolve_web_root() -> PathBuf {
     }
 
     let dev_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web");
+    
     if dev_root.is_dir() {
         return dev_root;
     }

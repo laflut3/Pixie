@@ -26,22 +26,31 @@ struct FileConfig {
     workers: Option<usize>,
 }
 
+// Builds the fallback bind address from default host and port.
+fn default_addr() -> String {
+    format!("{DEFAULT_HOST}:{DEFAULT_PORT}")
+}
+
+// Reads an optional config path override from PIXIE_CONFIG.
+fn env_config_path() -> Option<String> {
+    env_value(CONFIG_ENV_VAR)
+}
+
+// Resolves runtime config with precedence: file values, then hardcoded defaults.
 pub fn runtime_config() -> io::Result<RuntimeConfig> {
     let file_config = load_file_config()?;
 
-    let addr = file_addr(file_config.as_ref())
-        .or_else(env_addr)
-        .unwrap_or_else(default_addr);
+    let addr = file_addr(file_config.as_ref()).unwrap_or_else(default_addr);
 
     let workers = file_config
         .and_then(|cfg| cfg.workers)
-        .or_else(env_workers)
         .filter(|value| *value > 0)
         .unwrap_or(DEFAULT_THREADS);
 
     Ok(RuntimeConfig { addr, workers })
 }
 
+// Loads configuration from file, trying env override first, then system/local defaults.
 fn load_file_config() -> io::Result<Option<FileConfig>> {
     if let Some(path) = env_config_path() {
         return read_config_if_exists(&path);
@@ -56,17 +65,16 @@ fn load_file_config() -> io::Result<Option<FileConfig>> {
     Ok(None)
 }
 
-fn env_config_path() -> Option<String> {
-    env_trimmed(CONFIG_ENV_VAR)
-}
-
+// Reads and parses a YAML file only when it exists on disk.
 fn read_config_if_exists(path: &str) -> io::Result<Option<FileConfig>> {
     let path = Path::new(path);
+
     if !path.is_file() {
         return Ok(None);
     }
 
     let raw = fs::read_to_string(path)?;
+
     let config = serde_yaml::from_str::<FileConfig>(&raw).map_err(|err| {
         io::Error::new(
             io::ErrorKind::InvalidData,
@@ -77,42 +85,22 @@ fn read_config_if_exists(path: &str) -> io::Result<Option<FileConfig>> {
     Ok(Some(config))
 }
 
+// Derives an address from file config using `addr` first, else `host` + `port`.
 fn file_addr(config: Option<&FileConfig>) -> Option<String> {
     let config = config?;
 
-    clean(&config.addr).map(str::to_owned).or_else(|| {
+    config.addr.clone().or_else(|| {
         (config.host.is_some() || config.port.is_some()).then(|| {
-            let host = clean(&config.host).unwrap_or(DEFAULT_HOST);
+            let host = config.host.as_deref().unwrap_or(DEFAULT_HOST);
             let port = config.port.unwrap_or(DEFAULT_PORT);
             format!("{host}:{port}")
         })
     })
 }
 
-fn env_addr() -> Option<String> {
-    env_trimmed("PIXIE_ADDR")
-}
-
-fn env_workers() -> Option<usize> {
-    env::var("PIXIE_THREADS")
-        .ok()
-        .and_then(|value| value.trim().parse::<usize>().ok())
-}
-
-fn default_addr() -> String {
-    format!("{DEFAULT_HOST}:{DEFAULT_PORT}")
-}
-
-fn clean(value: &Option<String>) -> Option<&str> {
-    value
-        .as_deref()
-        .map(str::trim)
-        .filter(|trimmed| !trimmed.is_empty())
-}
-
-fn env_trimmed(key: &str) -> Option<String> {
+// Returns a non-empty environment variable value without extra normalization.
+fn env_value(key: &str) -> Option<String> {
     env::var(key)
         .ok()
-        .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
 }

@@ -77,3 +77,24 @@ fn keeps_defaults_for_invalid_workers() {
 
     let _ = fs::remove_file(path);
 }
+
+#[test]
+fn uses_hardcoded_defaults_when_no_yaml_is_found() {
+    let _lock = ENV_LOCK.lock().expect("env lock poisoned");
+    let _addr = EnvGuard::set("PIXIE_ADDR", "0.0.0.0:9999");
+    let _threads = EnvGuard::set("PIXIE_THREADS", "32");
+
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("time should be monotonic")
+        .as_nanos();
+    let missing_path = env::temp_dir().join(format!("pixie-missing-config-{nanos}.yml"));
+    let _config = EnvGuard::set(
+        "PIXIE_CONFIG",
+        missing_path.to_str().expect("utf-8 path"),
+    );
+
+    let config = runtime_config().expect("runtime config should load");
+    assert_eq!(config.addr, "127.0.0.1:80");
+    assert_eq!(config.workers, 4);
+}
