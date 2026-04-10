@@ -15,9 +15,11 @@ pub fn resolve_web_root() -> PathBuf {
 
         if !trimmed.is_empty() {
             let candidate = PathBuf::from(trimmed);
+
             if candidate.is_dir() {
                 return candidate;
             }
+            
             log_warn(format_args!(
                 "PIXIE_WEB_ROOT='{}' is not a directory, using fallback",
                 candidate.display()

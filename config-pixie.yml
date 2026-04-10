@@ -1,6 +1,5 @@
 # Configuration principale de Pixie
 # Utilise ce fichier pour les paramètres importants du serveur.
 
-host: 127.0.0.1
-port: 80
-nb_worker: 4
+addr: 0.0.0.0:8080
+workers: 4

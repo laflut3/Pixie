@@ -18,16 +18,15 @@ Objectif:
 Exemple minimal:
 
 ```yml
-host: 127.0.0.1
-port: 8080
-nb_worker: 4
+addr: 0.0.0.0:8080
+workers: 4
 ```
 
 Cles supportees:
+- `addr` (prioritaire sur `host` + `port`, ex: `0.0.0.0:8080`)
 - `host`
 - `port`
-- `nb_worker` (alias: `workers`)
-- `addr` (prioritaire sur `host` + `port`, ex: `0.0.0.0:8080`)
+- `workers` (alias accepte: `nb_worker`)
 
 ## Ordre de resolution
 

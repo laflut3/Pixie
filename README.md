@@ -31,9 +31,7 @@ sudo apt install --only-upgrade -y pixie
 ## Installation Arch Linux
 
 ```bash
-git clone https://github.com/laflut3/Pixie.git
-cd Pixie/arch
-makepkg -si
+yay -S pixie-git
 ```
 
 Activer le service:
@@ -65,16 +63,15 @@ Pour le developpement local, `./config-pixie.yml` est aussi supporte.
 Exemple:
 
 ```yml
-host: 127.0.0.1
-port: 80
-nb_worker: 4
+addr: 0.0.0.0:8080
+workers: 4
 ```
 
 Champs supportes:
+- `addr` (prioritaire sur `host` + `port`, ex: `0.0.0.0:8080`)
 - `host` (ex: `127.0.0.1`)
 - `port` (ex: `8080`)
-- `nb_worker` (alias: `workers`)
-- `addr` (optionnel, prioritaire sur `host` + `port`, ex: `0.0.0.0:8080`)
+- `workers` (alias accepte: `nb_worker`)
 
 Ordre de resolution:
 1. `PIXIE_CONFIG` (chemin de fichier explicite)
@@ -84,6 +81,9 @@ Ordre de resolution:
 
 Guide complet (Docker, Kubernetes, APT):
 [doc/configuration.md](/home/ltorres/perso/Pixie/doc/configuration.md)
+
+Publication multi-canaux (Docker + Debian + Arch/AUR):
+[doc/release_all_channels.md](/home/ltorres/perso/Pixie/doc/release_all_channels.md)
 
 ## Deploiement Docker
 

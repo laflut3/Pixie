@@ -2,13 +2,29 @@
 
 Ce guide fournit un paquet Arch Linux (`pixie-git`) pour installer Pixie via `pacman`.
 
+## Installation depuis AUR (recommande pour les utilisateurs)
+
+Avec un helper AUR:
+
+```bash
+yay -S pixie-git
+```
+
+Ou manuellement:
+
+```bash
+git clone https://aur.archlinux.org/pixie-git.git
+cd pixie-git
+makepkg -si
+```
+
 ## Prerequis
 
 ```bash
 sudo pacman -Syu --needed base-devel git
 ```
 
-## Installation via PKGBUILD
+## Installation via PKGBUILD local (mainteneur/dev)
 
 ```bash
 git clone https://github.com/laflut3/Pixie.git
@@ -48,3 +64,6 @@ Le fichier principal est:
 
 L'ordre de resolution de la config runtime est documente ici:
 [doc/configuration.md](/home/ltorres/perso/Pixie/doc/configuration.md)
+
+Pour publier/mettre a jour le paquet AUR:
+[doc/release_all_channels.md](/home/ltorres/perso/Pixie/doc/release_all_channels.md)

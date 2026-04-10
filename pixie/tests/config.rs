@@ -79,6 +79,20 @@ fn keeps_defaults_for_invalid_workers() {
 }
 
 #[test]
+fn supports_nb_worker_alias_from_yaml() {
+    let _lock = ENV_LOCK.lock().expect("env lock poisoned");
+
+    let path = write_temp_config("addr: 0.0.0.0:8080\nnb_worker: 6\n");
+    let _config = EnvGuard::set("PIXIE_CONFIG", path.to_str().expect("utf-8 path"));
+
+    let config = runtime_config().expect("runtime config should load");
+    assert_eq!(config.addr, "0.0.0.0:8080");
+    assert_eq!(config.workers, 6);
+
+    let _ = fs::remove_file(path);
+}
+
+#[test]
 fn uses_hardcoded_defaults_when_no_yaml_is_found() {
     let _lock = ENV_LOCK.lock().expect("env lock poisoned");
     let _addr = EnvGuard::set("PIXIE_ADDR", "0.0.0.0:9999");

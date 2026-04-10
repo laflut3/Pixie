@@ -22,7 +22,7 @@ struct FileConfig {
     host: Option<String>,
     #[serde(default)]
     port: Option<u16>,
-    #[serde(default)]
+    #[serde(default, alias = "nb_worker")]
     workers: Option<usize>,
 }
 

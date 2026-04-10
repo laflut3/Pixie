@@ -17,9 +17,9 @@ RUN apt-get update \
 
 COPY --from=builder /app/pixie/target/release/pixie /usr/local/bin/pixie
 COPY web /usr/share/pixie/web
+COPY config-pixie.yml /etc/pixie/config-pixie.yml
 
-ENV PIXIE_ADDR=0.0.0.0:8080
-ENV PIXIE_THREADS=4
+ENV PIXIE_CONFIG=/etc/pixie/config-pixie.yml
 ENV PIXIE_WEB_ROOT=/usr/share/pixie/web
 
 EXPOSE 8080
