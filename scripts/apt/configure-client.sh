@@ -76,6 +76,6 @@ fi
 cat <<EOF
 Pixie installed.
 - Service status: sudo systemctl status pixie
-- Follow logs:   pixie log -f
+- Follow logs:   sudo journalctl -u pixie.service -f
 - Upgrade later: sudo apt update && sudo apt install --only-upgrade pixie
 EOF

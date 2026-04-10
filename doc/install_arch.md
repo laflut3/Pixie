@@ -42,3 +42,8 @@ workers: 4
 ```bash
 yay -Syu pixie-git
 ```
+
+Note:
+
+- `pixie-git` est le nom du paquet AUR.
+- Le binaire installe s'appelle `pixie`.

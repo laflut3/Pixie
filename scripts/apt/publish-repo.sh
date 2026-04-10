@@ -33,6 +33,9 @@ if [[ -z "$DEB_FILE" ]]; then
   exit 1
 fi
 
+PKG_NAME="$(dpkg-deb -f "$DEB_FILE" Package)"
+PKG_VERSION="$(dpkg-deb -f "$DEB_FILE" Version)"
+
 mkdir -p "$REPO_DIR/conf"
 
 if [[ ! -f "$REPO_DIR/conf/distributions" ]]; then
@@ -57,6 +60,9 @@ if [[ -n "$GPG_KEY_ID" ]]; then
   fi
 fi
 
+# Replace existing entries for this package to avoid checksum conflicts when
+# rebuilding the same Debian version locally.
+reprepro -b "$REPO_DIR" remove "$DIST" "$PKG_NAME" >/dev/null 2>&1 || true
 reprepro -b "$REPO_DIR" includedeb "$DIST" "$DEB_FILE"
 
 if [[ -n "$GPG_KEY_ID" ]]; then
@@ -80,6 +86,7 @@ fi
 cat <<EOF
 Repository updated in: $REPO_DIR
 Package added: $DEB_FILE
+Package metadata: $PKG_NAME $PKG_VERSION ($ARCH)
 
 Next steps:
 1. Host '$REPO_DIR' over HTTPS (recommended), or use file:$REPO_DIR locally.
