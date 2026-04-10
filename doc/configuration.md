@@ -35,8 +35,7 @@ Pixie lit la configuration dans cet ordre:
 1. `PIXIE_CONFIG` (chemin explicite)
 2. `/etc/pixie/config-pixie.yml`
 3. `./config-pixie.yml`
-4. Variables d'environnement (`PIXIE_ADDR`, `PIXIE_THREADS`)
-5. Valeurs par defaut
+4. Valeurs hardcodees dans le code (`127.0.0.1:80`, `4` workers)
 
 ## Docker: monter le YAML en volume
 

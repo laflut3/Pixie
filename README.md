@@ -28,6 +28,24 @@ sudo apt update
 sudo apt install --only-upgrade -y pixie
 ```
 
+## Installation Arch Linux
+
+```bash
+git clone https://github.com/laflut3/Pixie.git
+cd Pixie/arch
+makepkg -si
+```
+
+Activer le service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now pixie.service
+```
+
+Guide detaille:
+[doc/arch_linux.md](/home/ltorres/perso/Pixie/doc/arch_linux.md)
+
 ## Verifier le service et les logs
 
 ```bash
@@ -62,8 +80,7 @@ Ordre de resolution:
 1. `PIXIE_CONFIG` (chemin de fichier explicite)
 2. `/etc/pixie/config-pixie.yml`
 3. `./config-pixie.yml`
-4. Variables d'environnement (`PIXIE_ADDR`, `PIXIE_THREADS`)
-5. Valeurs par defaut
+4. Valeurs hardcodees dans le code (`127.0.0.1:80`, `4` workers)
 
 Guide complet (Docker, Kubernetes, APT):
 [doc/configuration.md](/home/ltorres/perso/Pixie/doc/configuration.md)
@@ -92,6 +109,5 @@ docker pull ghcr.io/<owner>/<repo>:latest
 docker run --rm -p 8080:8080 ghcr.io/<owner>/<repo>:latest
 ```
 
-Variables utiles:
-- `PIXIE_ADDR` (defaut image Docker: `0.0.0.0:8080`)
-- `PIXIE_THREADS` (defaut: `4`)
+Variable utile:
+- `PIXIE_CONFIG` (chemin explicite vers un fichier YAML de configuration)

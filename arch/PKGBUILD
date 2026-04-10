@@ -1,0 +1,53 @@
+# Maintainer: Pixie Team
+
+pkgname=pixie-git
+_pkgname=pixie
+pkgver=1.1.0.r0.g0000000
+pkgrel=1
+pkgdesc="Pixie HTTP server written in Rust"
+arch=('x86_64' 'aarch64')
+url="https://github.com/laflut3/Pixie"
+license=('MIT')
+depends=('glibc' 'systemd')
+makedepends=('cargo' 'git')
+backup=('etc/pixie/config-pixie.yml')
+source=("${_pkgname}::git+https://github.com/laflut3/Pixie.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/${_pkgname}" || exit 1
+
+  local cargo_ver
+  cargo_ver="$(sed -n 's/^version = "\([^"]*\)"/\1/p' pixie/Cargo.toml | head -n1)"
+
+  local rev_count
+  rev_count="$(git rev-list --count HEAD)"
+
+  local short_hash
+  short_hash="$(git rev-parse --short HEAD)"
+
+  printf '%s.r%s.g%s\n' "${cargo_ver}" "${rev_count}" "${short_hash}"
+}
+
+build() {
+  cd "${srcdir}/${_pkgname}/pixie" || exit 1
+  cargo build --release --locked
+}
+
+check() {
+  cd "${srcdir}/${_pkgname}/pixie" || exit 1
+  cargo test --locked
+}
+
+package() {
+  cd "${srcdir}/${_pkgname}" || exit 1
+
+  install -Dm755 "pixie/target/release/pixie" "${pkgdir}/usr/bin/pixie"
+
+  install -dm755 "${pkgdir}/usr/share/pixie/web"
+  install -m644 web/*.html "${pkgdir}/usr/share/pixie/web/"
+
+  install -Dm644 config-pixie.yml "${pkgdir}/etc/pixie/config-pixie.yml"
+  install -Dm644 debian/pixie.service "${pkgdir}/usr/lib/systemd/system/pixie.service"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
