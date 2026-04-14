@@ -5,29 +5,24 @@ use std::{
 
 use super::job::Job;
 
+/// Worker interne du thread-pool.
 pub(super) struct Worker {
     id: usize,
     thread: Option<thread::JoinHandle<()>>,
 }
 
 impl Worker {
+    /// Démarre un worker qui consomme des jobs depuis `receiver`.
     pub(super) fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Self {
         let thread = thread::spawn(move || {
             loop {
-                let message = match receiver.lock() {
-                    Ok(guard) => guard.recv(),
-                    Err(_) => {
-                        eprintln!(
-                            "[pixie][error] worker {id} receiver lock poisoned; shutting down"
-                        );
-                        break;
-                    }
-                };
+                let message = receiver
+                    .lock()
+                    .expect("worker receiver lock poisoned")
+                    .recv();
 
                 match message {
-                    Ok(job) => {
-                        job();
-                    }
+                    Ok(job) => job(),
                     Err(_) => {
                         eprintln!("[pixie][info] worker {id} disconnected; shutting down");
                         break;
@@ -42,6 +37,7 @@ impl Worker {
         }
     }
 
+    /// Attend la fin du thread worker.
     pub(super) fn join(&mut self) {
         if let Some(thread) = self.thread.take()
             && let Err(err) = thread.join()

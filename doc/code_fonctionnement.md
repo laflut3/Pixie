@@ -2,7 +2,7 @@
 
 ## Vue D'ensemble
 
-Pixie est un serveur HTTP simple en Rust base sur:
+Pixie est un serveur HTTP statique en Rust base sur:
 
 - resolution de configuration YAML
 - ecoute TCP
@@ -27,9 +27,9 @@ Fichier: `/pixie/src/config.rs`
 
 Responsabilites:
 
-- lecture YAML depuis `PIXIE_CONFIG`, `/etc/pixie/config-pixie.yml`, puis `./config-pixie.yml`
+- lecture YAML depuis `PIXIE_CONFIG`, puis `./config-pixie.yml`, puis `/etc/pixie/config-pixie.yml`
 - fallback sur valeurs hardcodees (`127.0.0.1:80`, `workers=4`)
-- prise en charge des cles `addr`, `host`, `port`, `workers`, alias `nb_worker`
+- prise en charge des cles `addr`, `host`, `port`, `workers`, alias `address` et `nb_worker`
 
 ### Serveur
 
@@ -81,3 +81,39 @@ Responsabilites:
 3. `handle_connection` lit la request line
 4. `resolve_route` choisit le fichier HTML
 5. le serveur renvoie une reponse HTTP avec status + contenu
+
+## Tests
+
+Tous les tests sont regroupes dans:
+
+- `/pixie/tests/`
+
+Suites presentes:
+
+- `config_tests.rs`
+- `router_tests.rs`
+- `server_tests.rs`
+- `threadpool_tests.rs`
+- `logger_tests.rs`
+- `cli_tests.rs`
+
+## Couverture
+
+Commande recommandee (instrumentation LLVM):
+
+```bash
+cd pixie
+cargo clean
+RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='pixie-%p-%m.profraw' cargo test
+TOOLBIN="$(rustc --print sysroot)/lib/rustlib/x86_64-unknown-linux-gnu/bin"
+"$TOOLBIN/llvm-profdata" merge -sparse pixie-*.profraw -o pixie.profdata
+"$TOOLBIN/llvm-cov" report \
+  --object target/debug/deps/config_tests-* \
+  --object target/debug/deps/threadpool_tests-* \
+  --object target/debug/deps/router_tests-* \
+  --object target/debug/deps/server_tests-* \
+  --object target/debug/deps/logger_tests-* \
+  --object target/debug/deps/cli_tests-* \
+  --instr-profile pixie.profdata \
+  --ignore-filename-regex '/\\.cargo/registry|/tests/'
+```

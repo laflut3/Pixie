@@ -1,0 +1,17 @@
+pkgbase = pixie-git
+	pkgdesc = Pixie HTTP server written in Rust
+	pkgver = 1.1.0.r0.g0000000
+	pkgrel = 1
+	url = https://github.com/laflut3/Pixie
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	makedepends = cargo
+	makedepends = git
+	depends = glibc
+	depends = systemd
+	backup = etc/pixie/config-pixie.yml
+	source = pixie::git+https://github.com/laflut3/Pixie.git
+	sha256sums = SKIP
+
+pkgname = pixie-git

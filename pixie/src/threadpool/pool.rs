@@ -2,15 +2,16 @@ use std::sync::{Arc, Mutex, mpsc};
 
 use super::{job::Job, worker::Worker};
 
+/// Pool de threads fixe utilisé pour exécuter des jobs concurrents.
 pub struct ThreadPool {
     workers: Vec<Worker>,
     sender: Option<mpsc::Sender<Job>>,
 }
 
 impl ThreadPool {
-    /// Create a new ThreadPool.
+    /// Crée un thread-pool de taille `size`.
     ///
-    /// The size is the number of threads in the pool.
+    /// Panique si `size == 0`.
     pub fn new(size: usize) -> ThreadPool {
         assert!(size > 0, "thread pool size must be greater than zero");
 
@@ -28,26 +29,24 @@ impl ThreadPool {
         }
     }
 
+    /// Soumet un job au pool pour exécution asynchrone.
     pub fn execute<F>(&self, f: F)
     where
         F: FnOnce() + Send + 'static,
     {
-        let job = Box::new(f);
+        let sender = self
+            .sender
+            .as_ref()
+            .expect("thread pool sender is missing");
 
-        match &self.sender {
-            Some(sender) => {
-                if let Err(err) = sender.send(job) {
-                    eprintln!("[pixie][error] failed to send job to worker: {err}");
-                }
-            }
-            None => {
-                eprintln!("[pixie][warn] thread pool is shut down; rejecting new job");
-            }
+        if let Err(err) = sender.send(Box::new(f)) {
+            eprintln!("[pixie][error] failed to send job to worker: {err}");
         }
     }
 }
 
 impl Drop for ThreadPool {
+    /// Ferme proprement le canal puis attend la terminaison de tous les workers.
     fn drop(&mut self) {
         drop(self.sender.take());
 

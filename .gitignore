@@ -29,12 +29,15 @@ pixie_*.buildinfo
 pixie_*.changes
 pixie_*.dsc
 pixie_*.tar.*
+*.profraw
+*.profdata
 
 debian/.debhelper/
 debian/debhelper-build-stamp
 debian/files
 debian/tmp/
 debian/pixie/
+debian/*.debhelper
 debian/*.debhelper.log
 debian/*.substvars
 

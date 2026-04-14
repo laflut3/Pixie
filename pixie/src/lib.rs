@@ -1,3 +1,10 @@
+//! Bibliothèque principale de Pixie.
+//!
+//! Cette crate expose un serveur HTTP statique minimal:
+//! - résolution de configuration runtime
+//! - résolution de routes HTML
+//! - exécution serveur TCP avec thread-pool
+
 pub mod config;
 pub mod logger;
 pub mod router;
