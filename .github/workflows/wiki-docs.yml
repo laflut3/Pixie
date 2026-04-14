@@ -23,11 +23,17 @@ jobs:
 
       - name: Publish wikidoc to Wiki
         env:
-          GH_TOKEN: ${{ secrets.WIKI_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.WIKI_TOKEN }}
           REPO: ${{ github.repository }}
           SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "Secret WIKI_TOKEN manquant."
+            echo "Configure un PAT (classic) avec scope 'repo' dans Settings > Secrets and variables > Actions."
+            exit 1
+          fi
 
           API_URL="https://api.github.com/repos/${REPO}"
           HAS_WIKI="$(curl -fsSL \
@@ -41,16 +47,17 @@ jobs:
           fi
 
           WIKI_URL="https://x-access-token:${GH_TOKEN}@github.com/${REPO}.wiki.git"
+          WIKI_WEB_URL="https://github.com/${REPO}/wiki"
 
-          if git clone "$WIKI_URL" wiki; then
-            echo "Wiki repository cloned"
-          else
-            echo "Wiki repository not yet initialized, creating it"
-            mkdir -p wiki
-            git -C wiki init -b master
-            git -C wiki remote add origin "$WIKI_URL"
+          if ! git ls-remote "$WIKI_URL" >/dev/null 2>&1; then
+            echo "Depot wiki inaccessible: ${REPO}.wiki.git"
+            echo "Actions requises:"
+            echo "1) Ouvre ${WIKI_WEB_URL} et cree une premiere page (initialise le repo wiki)."
+            echo "2) Verifie que WIKI_TOKEN est un PAT classic avec scope 'repo'."
+            exit 1
           fi
 
+          git clone "$WIKI_URL" wiki
           rsync -av --delete --exclude '.git/' wikidoc/ wiki/
 
           cd wiki
@@ -60,12 +67,8 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             git add -A
             git commit -m "docs: sync wikidoc (${SHA})"
-            if git push origin HEAD:master; then
-              echo "Wiki updated"
-            else
-              echo "Echec de push wiki. Verifie l'activation du wiki et/ou configure le secret WIKI_TOKEN (PAT avec droits repo)."
-              exit 1
-            fi
+            git push origin HEAD:master
+            echo "Wiki updated"
           else
             echo "No wiki changes to publish"
           fi
