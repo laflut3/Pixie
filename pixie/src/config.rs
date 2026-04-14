@@ -45,7 +45,9 @@ fn default_addr() -> String {
 
 /// Lit `PIXIE_CONFIG` et renvoie sa valeur uniquement si elle est non vide.
 fn env_config_path() -> Option<String> {
-    env::var(CONFIG_ENV_VAR).ok().filter(|value| !value.is_empty())
+    env::var(CONFIG_ENV_VAR)
+        .ok()
+        .filter(|value| !value.is_empty())
 }
 
 /// Résout la configuration runtime en appliquant les priorités de fichiers,

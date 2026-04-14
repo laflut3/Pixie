@@ -34,10 +34,7 @@ impl ThreadPool {
     where
         F: FnOnce() + Send + 'static,
     {
-        let sender = self
-            .sender
-            .as_ref()
-            .expect("thread pool sender is missing");
+        let sender = self.sender.as_ref().expect("thread pool sender is missing");
 
         if let Err(err) = sender.send(Box::new(f)) {
             eprintln!("[pixie][error] failed to send job to worker: {err}");

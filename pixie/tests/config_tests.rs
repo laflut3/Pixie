@@ -1,8 +1,8 @@
 mod common;
 
 use common::{EnvGuard, TempFile, env_lock, unique_path};
-use std::fs;
 use pixie::runtime_config;
+use std::fs;
 
 /// Vérifie le fallback complet quand aucun fichier n'est disponible.
 #[test]

@@ -10,7 +10,10 @@ use pixie::{resolve_route, resolve_web_root};
 fn resolve_web_root_utilise_pixie_web_root_si_valide() {
     let _lock = env_lock();
     let web = TempDir::new("pixie-web-root");
-    let _env = EnvGuard::set("PIXIE_WEB_ROOT", web.path.to_str().expect("chemin non UTF-8"));
+    let _env = EnvGuard::set(
+        "PIXIE_WEB_ROOT",
+        web.path.to_str().expect("chemin non UTF-8"),
+    );
 
     assert_eq!(resolve_web_root(), web.path);
 }
