@@ -10,5 +10,6 @@ override_dh_auto_build:
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	cargo test --manifest-path pixie/Cargo.toml --locked
+	cargo test --manifest-path pixie/Cargo.toml --locked --lib --bins
+	cargo test --manifest-path pixie/Cargo.toml --locked --test config_tests --test logger_tests --test router_tests --test threadpool_tests
 endif

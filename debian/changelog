@@ -1,3 +1,17 @@
+pixie (1.1.0-3) unstable; urgency=medium
+
+  * Ensure compatibility with Debian Rust toolchains:
+    - replace let-chain conditions with stable equivalents
+      in router and threadpool worker modules.
+  * Debian packaging hardening pass:
+    - switch package description to English
+    - add manpage (`debian/pixie.1`)
+    - harden systemd unit and fix ExecStart (no subcommand)
+    - keep only deterministic non-network test suites in package build
+    - normalize maintainer email in old changelog entries
+
+ -- Léo Torres <leo0609leo@gmail.com>  Tue, 14 Apr 2026 16:05:00 +0200
+
 pixie (1.1.0-2) unstable; urgency=medium
 
   * Packaging QA cleanup:
@@ -20,17 +34,17 @@ pixie (1.0.0-1) unstable; urgency=medium
 
   * Prepare 1.0.0-1 Debian package release.
 
- -- Léo Torres <ltorres@localhost>  Thu, 09 Apr 2026 10:11:34 +0200
+ -- Léo Torres <leo0609leo@gmail.com>  Thu, 09 Apr 2026 10:11:34 +0200
 
 pixie (0.1.0-2) unstable; urgency=medium
 
   * Add systemd unit so pixie starts automatically after install and at boot.
   * Add `pixie log` command to read service logs from journald.
 
- -- Léo Torres <ltorres@localhost>  Wed, 08 Apr 2026 15:48:00 +0200
+ -- Léo Torres <leo0609leo@gmail.com>  Wed, 08 Apr 2026 15:48:00 +0200
 
 pixie (0.1.0-1) unstable; urgency=medium
 
   * Initial Debian packaging.
 
- -- Léo Torres <ltorres@localhost>  Wed, 08 Apr 2026 14:33:22 +0200
+ -- Léo Torres <leo0609leo@gmail.com>  Wed, 08 Apr 2026 14:33:22 +0200

@@ -1,0 +1,37 @@
+.TH PIXIE 1 "April 2026" "pixie 1.1.0" "User Commands"
+.SH NAME
+pixie \- minimal static HTTP server
+.SH SYNOPSIS
+.B pixie
+.SH DESCRIPTION
+\fBpixie\fR starts a static HTTP server using runtime configuration from:
+.IP \(bu 2
+\fBPIXIE_CONFIG\fR (if set)
+.IP \(bu 2
+\fB./config-pixie.yml\fR
+.IP \(bu 2
+\fB/etc/pixie/config-pixie.yml\fR
+.PP
+Web content root is resolved from:
+.IP \(bu 2
+\fBPIXIE_WEB_ROOT\fR (if set and valid)
+.IP \(bu 2
+development \fB../web\fR
+.IP \(bu 2
+\fB/usr/share/pixie/web\fR
+.SH FILES
+.TP
+.B /etc/pixie/config-pixie.yml
+System-wide runtime configuration file.
+.TP
+.B /usr/share/pixie/web
+Default static web root.
+.SH EXIT STATUS
+.TP
+.B 0
+Normal exit.
+.TP
+.B 2
+Configuration initialization error.
+.SH SEE ALSO
+.BR systemd (1)
