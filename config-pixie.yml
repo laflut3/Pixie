@@ -1,5 +1,0 @@
-# Configuration principale de Pixie
-# Utilise ce fichier pour les paramètres importants du serveur.
-
-addr: 0.0.0.0:8080
-workers: 4
