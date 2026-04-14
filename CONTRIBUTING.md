@@ -22,7 +22,6 @@ cargo --version
 - `pixie/`: code Rust (librairie + binaire)
 - `web/`: pages HTML servies par le serveur
 - `debian/`: packaging Debian
-- `scripts/apt/`: scripts pour publier/configurer le depot APT
 
 ## Nommage des branches
 
@@ -85,12 +84,6 @@ Depuis la racine:
 
 ```bash
 dpkg-buildpackage -us -uc -b
-```
-
-Optionnel, pour tester le repo APT:
-
-```bash
-GPG_KEY_ID=<KEY_ID> DIST=bookworm COMPONENT=main ./scripts/apt/publish-repo.sh
 ```
 
 ## Pull Request checklist

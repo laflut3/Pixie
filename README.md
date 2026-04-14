@@ -15,17 +15,16 @@ docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest
 
 ### Debian / Ubuntu
 
+Publication en cours dans les depots officiels Debian.
+
+Quand le paquet sera disponible dans la distribution cible:
+
 ```bash
-sudo install -d -m 0755 /usr/share/keyrings
-curl -fsSL https://repo.example.org/pixie/keyrings/pixie-archive-keyring.gpg \
-  | sudo tee /usr/share/keyrings/pixie-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/pixie-archive-keyring.gpg] https://repo.example.org/pixie bookworm main" \
-  | sudo tee /etc/apt/sources.list.d/pixie.list >/dev/null
 sudo apt update
 sudo apt install -y pixie
 ```
 
-Le service est gere automatiquement par le systeme d'installation.
+Suivi publication Debian: `ITP #1133770`, `RFS #1133771`.
 
 ### Arch Linux
 
