@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: rustfmt
+        name: rustfmt (pixie)
+        language: system
+        entry: bash -c 'cd pixie && cargo fmt --all -- --check'
+        pass_filenames: false
+        files: ^pixie/(src/|tests/|Cargo\.toml|Cargo\.lock)
+        stages: [pre-commit]
+
+      - id: clippy
+        name: clippy (pixie)
+        language: system
+        entry: bash -c 'cd pixie && cargo clippy --locked --all-targets --all-features -- -D warnings'
+        pass_filenames: false
+        files: ^pixie/(src/|tests/|Cargo\.toml|Cargo\.lock)
+        stages: [pre-commit]

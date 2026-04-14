@@ -65,6 +65,20 @@ cargo clippy --locked --all-targets --all-features -- -D warnings
 cargo test --all-features --locked
 ```
 
+## Pre-commit
+
+A la racine du repo:
+
+```bash
+pre-commit install
+pre-commit run --all-files
+```
+
+Le hook `pre-commit` execute automatiquement:
+
+- `cargo fmt --all -- --check` (dans `pixie/`)
+- `cargo clippy --locked --all-targets --all-features -- -D warnings` (dans `pixie/`)
+
 ## Si vous modifiez le packaging Debian
 
 Depuis la racine:
