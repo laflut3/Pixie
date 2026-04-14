@@ -21,8 +21,12 @@ sudo apt update
 sudo apt install -y pixie
 ```
 
+Le service est gere automatiquement par le systeme d'installation.
+
 ### Arch Linux
 
 ```bash
 yay -S pixie-git
 ```
+
+Le service est gere automatiquement par le systeme d'installation.

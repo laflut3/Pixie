@@ -15,13 +15,7 @@ sudo apt update
 sudo apt install -y pixie
 ```
 
-## Service
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now pixie.service
-sudo systemctl status pixie
-```
+Le service est gere automatiquement par le systeme d'installation.
 
 ## Configuration
 
@@ -34,11 +28,4 @@ Exemple expose reseau:
 ```yml
 addr: 0.0.0.0:8080
 workers: 4
-```
-
-## Mise A Jour
-
-```bash
-sudo apt update
-sudo apt install --only-upgrade -y pixie
 ```
