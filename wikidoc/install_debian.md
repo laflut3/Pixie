@@ -23,10 +23,10 @@ Depuis mentors.debian.net:
 ```bash
 sudo apt install -y devscripts
 cd /tmp
-dget -x https://mentors.debian.net/debian/pool/main/p/pixie/pixie_1.1.0-2.dsc
+dget -x https://mentors.debian.net/debian/pool/main/p/pixie/pixie_1.1.0-3.dsc
 cd pixie-1.1.0
 dpkg-buildpackage -us -uc -b
-sudo apt install ../pixie_1.1.0-2_amd64.deb
+sudo apt install ../pixie_1.1.0-3_amd64.deb
 ```
 
 ## Configuration

@@ -65,7 +65,7 @@ Puis suivre le bug RFS (ex: `#1133771`) avec le lien `dget -x` mentors.
 - ITP: `#1133770`
 - RFS: `#1133771`
 - Upload mentors:
-  `https://mentors.debian.net/debian/pool/main/p/pixie/pixie_1.1.0-2.dsc`
+  `https://mentors.debian.net/debian/pool/main/p/pixie/pixie_1.1.0-3.dsc`
 
 ## Notes importantes
 

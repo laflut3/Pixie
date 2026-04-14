@@ -27,4 +27,3 @@ EXPOSE 8080
 USER pixie
 
 ENTRYPOINT ["/usr/local/bin/pixie"]
-CMD ["serve"]

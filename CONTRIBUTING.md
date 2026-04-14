@@ -92,6 +92,7 @@ Avant de soumettre:
 
 - [ ] La branche respecte le format de nommage.
 - [ ] `cargo fmt`, `cargo clippy` et `cargo test` passent en local.
+- [ ] Le seuil de couverture CI reste >= 70%.
 - [ ] Les changements sont documentes si necessaire (`README.md`).
 - [ ] Aucun secret/cle privee/fichier sensible n est commit.
 - [ ] La CI GitHub est verte.

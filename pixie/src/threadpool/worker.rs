@@ -39,10 +39,12 @@ impl Worker {
 
     /// Attend la fin du thread worker.
     pub(super) fn join(&mut self) {
-        if let Some(thread) = self.thread.take() {
-            if let Err(err) = thread.join() {
-                eprintln!("[pixie][error] worker {} panicked: {:?}", self.id, err);
-            }
+        let Some(thread) = self.thread.take() else {
+            return;
+        };
+
+        if let Err(err) = thread.join() {
+            eprintln!("[pixie][error] worker {} panicked: {:?}", self.id, err);
         }
     }
 }

@@ -23,19 +23,20 @@ const NOT_FOUND_PAGE: &str = "404.html";
 /// 2. `../web` depuis le manifeste Cargo (mode dev)
 /// 3. `/usr/share/pixie/web` (install système)
 pub fn resolve_web_root() -> PathBuf {
-    if let Ok(path) = env::var("PIXIE_WEB_ROOT") {
-        if !path.is_empty() {
-            let candidate = PathBuf::from(path);
+    if let Some(path) = env::var("PIXIE_WEB_ROOT")
+        .ok()
+        .filter(|path| !path.is_empty())
+    {
+        let candidate = PathBuf::from(path);
 
-            if candidate.is_dir() {
-                return candidate;
-            }
-
-            log_warn(format_args!(
-                "PIXIE_WEB_ROOT='{}' is not a directory, using fallback",
-                candidate.display()
-            ));
+        if candidate.is_dir() {
+            return candidate;
         }
+
+        log_warn(format_args!(
+            "PIXIE_WEB_ROOT='{}' is not a directory, using fallback",
+            candidate.display()
+        ));
     }
 
     let dev_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../web");

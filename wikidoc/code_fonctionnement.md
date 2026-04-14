@@ -15,9 +15,8 @@ Fichier: `/pixie/src/main.rs`
 
 Flux:
 
-1. lit les arguments CLI (`pixie serve`)
-2. charge la config runtime via `runtime_config()`
-3. lance le serveur via `run_server(addr, workers)`
+1. charge la config runtime via `runtime_config()`
+2. lance le serveur via `run_server(addr, workers)`
 
 ## Modules Principaux
 
@@ -95,7 +94,6 @@ Suites presentes:
 - `server_tests.rs`
 - `threadpool_tests.rs`
 - `logger_tests.rs`
-- `cli_tests.rs`
 
 ## Couverture
 
@@ -113,7 +111,6 @@ TOOLBIN="$(rustc --print sysroot)/lib/rustlib/x86_64-unknown-linux-gnu/bin"
   --object target/debug/deps/router_tests-* \
   --object target/debug/deps/server_tests-* \
   --object target/debug/deps/logger_tests-* \
-  --object target/debug/deps/cli_tests-* \
   --instr-profile pixie.profdata \
   --ignore-filename-regex '/\\.cargo/registry|/tests/'
 ```
