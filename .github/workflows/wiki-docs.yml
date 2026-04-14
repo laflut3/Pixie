@@ -1,12 +1,6 @@
 name: wiki-docs
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'wikidoc/**'
-      - '.github/workflows/wiki-docs.yml'
   workflow_dispatch:
 
 permissions:
