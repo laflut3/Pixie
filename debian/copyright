@@ -1,6 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: pixie
 Source: .
+Upstream-Contact: Léo Torres <leo0609leo@gmail.com>
 
 Files: *
 Copyright: 2026 Léo Torres

@@ -1,9 +1,12 @@
 Source: pixie
 Section: web
 Priority: optional
-Maintainer: Léo Torres <ltorres@localhost>
+Maintainer: Léo Torres <leo0609leo@gmail.com>
 Build-Depends: debhelper-compat (= 13), cargo, rustc
-Standards-Version: 4.7.0
+Standards-Version: 4.7.3
+Homepage: https://github.com/laflut3/Pixie
+Vcs-Git: https://github.com/laflut3/Pixie.git
+Vcs-Browser: https://github.com/laflut3/Pixie
 Rules-Requires-Root: no
 
 Package: pixie

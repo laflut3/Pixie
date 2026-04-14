@@ -90,6 +90,12 @@ Package metadata: $PKG_NAME $PKG_VERSION ($ARCH)
 
 Next steps:
 1. Host '$REPO_DIR' over HTTPS (recommended), or use file:$REPO_DIR locally.
-2. On client machine:
-   ./scripts/apt/configure-client.sh <REPO_URL> $DIST $COMPONENT
+2. On client machine (without custom script):
+   sudo install -d -m 0755 /usr/share/keyrings
+   curl -fsSL <REPO_URL>/keyrings/pixie-archive-keyring.gpg \
+     | sudo tee /usr/share/keyrings/pixie-archive-keyring.gpg >/dev/null
+   echo "deb [signed-by=/usr/share/keyrings/pixie-archive-keyring.gpg] <REPO_URL> $DIST $COMPONENT" \
+     | sudo tee /etc/apt/sources.list.d/pixie.list >/dev/null
+   sudo apt update
+   sudo apt install -y pixie
 EOF

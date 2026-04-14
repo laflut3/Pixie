@@ -1,9 +1,20 @@
+pixie (1.1.0-2) unstable; urgency=medium
+
+  * Packaging QA cleanup:
+    - bump Standards-Version to 4.7.3
+    - honor DEB_BUILD_OPTIONS=nocheck in debian/rules
+    - add debian/watch
+    - add debian/upstream/metadata
+    - add Upstream-Contact in debian/copyright
+
+ -- Léo Torres <leo0609leo@gmail.com>  Tue, 14 Apr 2026 15:20:00 +0200
+
 pixie (1.1.0-1) unstable; urgency=medium
 
   * Simplify configuration loading and keep config in /etc/pixie/config-pixie.yml.
   * Move config tests to integration tests under pixie/tests/.
 
- -- Léo Torres <ltorres@localhost>  Thu, 09 Apr 2026 13:49:53 +0200
+ -- Léo Torres <leo0609leo@gmail.com>  Thu, 09 Apr 2026 13:49:53 +0200
 
 pixie (1.0.0-1) unstable; urgency=medium
 

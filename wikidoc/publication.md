@@ -45,6 +45,18 @@ GPG_KEY_ID=<KEY_ID> DIST=bookworm COMPONENT=main ./scripts/apt/publish-repo.sh
 
 Ensuite publier `apt-repo/` sur ton endpoint HTTPS (ex: `https://repo.example.org/pixie`).
 
+Installation client standard (sans script):
+
+```bash
+sudo install -d -m 0755 /usr/share/keyrings
+curl -fsSL https://repo.example.org/pixie/keyrings/pixie-archive-keyring.gpg \
+  | sudo tee /usr/share/keyrings/pixie-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/pixie-archive-keyring.gpg] https://repo.example.org/pixie bookworm main" \
+  | sudo tee /etc/apt/sources.list.d/pixie.list >/dev/null
+sudo apt update
+sudo apt install -y pixie
+```
+
 ## 3. Arch Linux (AUR)
 
 Le package source est:
