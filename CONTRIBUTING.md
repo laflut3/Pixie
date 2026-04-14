@@ -103,6 +103,17 @@ Avant de soumettre:
 - [ ] Aucun secret/cle privee/fichier sensible n est commit.
 - [ ] La CI GitHub est verte.
 
+## Hygiene securite (repo public)
+
+- Ne pas commiter de secrets (`token`, `password`, cle privee, `.env`).
+- Ne pas commiter d artefacts de packaging (`*.deb`, `*.dsc`, `*.changes`, `*.buildinfo`, `*.orig.tar.*`).
+- Verifier rapidement avant push:
+
+```bash
+git status --short
+git diff --cached
+```
+
 ## Style de commit recommande
 
 - Messages clairs et courts, a l imperatif.

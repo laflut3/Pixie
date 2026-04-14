@@ -34,3 +34,9 @@ yay -S pixie-git
 ```
 
 Le service est gere automatiquement par le systeme d'installation.
+
+## Securite du depot public
+
+- Ne jamais commiter de cle privee, token, mot de passe ou fichier `.env`.
+- Les artefacts de build/packaging (`*.deb`, `*.dsc`, `*.changes`, `*.buildinfo`, `*.orig.tar.*`) sont ignores par `.gitignore`.
+- Les secrets CI/CD doivent rester dans GitHub Actions Secrets, jamais dans le code.

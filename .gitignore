@@ -21,14 +21,23 @@ target
 #.idea/
 
 *.codex
+.env
+.env.*
+!.env.example
 
 # Debian packaging artifacts (dpkg-buildpackage / debhelper)
-pixie_*.deb
-pixie_*.udeb
-pixie_*.buildinfo
-pixie_*.changes
-pixie_*.dsc
-pixie_*.tar.*
+*.deb
+*.udeb
+*.ddeb
+*.build
+*.buildinfo
+*.changes
+*.dsc
+*.orig.tar.*
+*.debian.tar.*
+*_source.buildinfo
+*_source.changes
+*.mentors.upload
 *.profraw
 *.profdata
 
