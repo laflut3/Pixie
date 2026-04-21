@@ -6,6 +6,9 @@ export CARGO_HOME = $(CURDIR)/debian/cargo_home
 %:
 	dh $@ --buildsystem cargo --with cargo
 
+override_dh_auto_clean:
+	dh_auto_clean -- --manifest-path pixie/Cargo.toml
+
 override_dh_auto_build:
 	dh_auto_build -- --manifest-path pixie/Cargo.toml --release --locked --offline
 
