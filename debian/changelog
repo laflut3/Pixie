@@ -1,3 +1,16 @@
+pixie (1.1.0-4) unstable; urgency=medium
+
+  * Build Rust package fully offline:
+    - switch Debian build flow to `dh-cargo`
+    - set `CARGO_HOME` inside build tree (`debian/cargo_home`)
+    - pass `--offline` to build and test cargo invocations
+  * Add missing Rust crate Build-Depends requested by mentors:
+    - librust-serde-dev (rust-serde)
+    - librust-serde+derive-dev
+    - librust-serde-yaml-dev (rust-serde-yaml)
+
+ -- Léo Torres <leo0609leo@gmail.com>  Tue, 21 Apr 2026 10:00:00 +0200
+
 pixie (1.1.0-3) unstable; urgency=medium
 
   * Ensure compatibility with Debian Rust toolchains:

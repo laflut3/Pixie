@@ -1,15 +1,16 @@
 #!/usr/bin/make -f
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export CARGO_HOME = $(CURDIR)/debian/cargo_home
 
 %:
-	dh $@
+	dh $@ --buildsystem cargo --with cargo
 
 override_dh_auto_build:
-	cargo build --manifest-path pixie/Cargo.toml --release --locked
+	dh_auto_build -- --manifest-path pixie/Cargo.toml --release --locked --offline
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	cargo test --manifest-path pixie/Cargo.toml --locked --lib --bins
-	cargo test --manifest-path pixie/Cargo.toml --locked --test config_tests --test logger_tests --test router_tests --test threadpool_tests
+	dh_auto_test -- --manifest-path pixie/Cargo.toml --locked --offline --lib --bins
+	dh_auto_test -- --manifest-path pixie/Cargo.toml --locked --offline --test config_tests --test logger_tests --test router_tests --test threadpool_tests
 endif

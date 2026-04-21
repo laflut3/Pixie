@@ -2,7 +2,14 @@ Source: pixie
 Section: web
 Priority: optional
 Maintainer: Léo Torres <leo0609leo@gmail.com>
-Build-Depends: debhelper-compat (= 13), cargo, rustc
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-cargo,
+ cargo,
+ rustc,
+ librust-serde-dev,
+ librust-serde+derive-dev,
+ librust-serde-yaml-dev
 Standards-Version: 4.7.3
 Homepage: https://github.com/laflut3/Pixie
 Vcs-Git: https://github.com/laflut3/Pixie.git
