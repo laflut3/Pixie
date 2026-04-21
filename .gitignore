@@ -49,6 +49,7 @@ debian/pixie/
 debian/*.debhelper
 debian/*.debhelper.log
 debian/*.substvars
+.pc/
 
 # Generated local APT repository
 apt-repo/
