@@ -4,7 +4,7 @@ use std::{
     env, fs,
     io::{self, Read, Write},
     net::{Shutdown, TcpListener, TcpStream},
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::Mutex,
     thread,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -152,9 +152,4 @@ pub fn send_http_request(addr: &str, request: &str) -> io::Result<String> {
     stream.read_to_end(&mut buf)?;
     String::from_utf8(buf)
         .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err.to_string()))
-}
-
-/// Retourne vrai si le chemin pointe vers un dossier existant.
-pub fn is_dir(path: &Path) -> bool {
-    path.is_dir()
 }

@@ -3,7 +3,7 @@ use std::{
     thread,
 };
 
-use super::job::Job;
+use super::Job;
 
 /// Worker interne du thread-pool.
 pub(super) struct Worker {
@@ -20,14 +20,14 @@ impl Worker {
                     .lock()
                     .expect("worker receiver lock poisoned")
                     .recv();
+                let Ok(job) = message else {
+                    crate::logger::log_info(format_args!(
+                        "worker {id} disconnected; shutting down"
+                    ));
+                    break;
+                };
 
-                match message {
-                    Ok(job) => job(),
-                    Err(_) => {
-                        eprintln!("[pixie][info] worker {id} disconnected; shutting down");
-                        break;
-                    }
-                }
+                job();
             }
         });
 
@@ -39,12 +39,10 @@ impl Worker {
 
     /// Attend la fin du thread worker.
     pub(super) fn join(&mut self) {
-        let Some(thread) = self.thread.take() else {
-            return;
-        };
-
-        if let Err(err) = thread.join() {
-            eprintln!("[pixie][error] worker {} panicked: {:?}", self.id, err);
+        if let Some(thread) = self.thread.take() {
+            if thread.join().is_err() {
+                crate::logger::log_error(format_args!("worker {} panicked", self.id));
+            }
         }
     }
 }

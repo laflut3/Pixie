@@ -5,9 +5,9 @@
 
 use std::{
     fs,
-    io::{self, BufReader, prelude::*},
+    io::{self, BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
-    path::{Path, PathBuf},
+    path::Path,
     sync::Arc,
 };
 
@@ -30,34 +30,35 @@ pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
         web_root.display()
     ));
 
-    for stream in listener.incoming().flatten() {
-        dispatch_stream(stream, &pool, web_root.as_path());
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) => {
+                let web_root = Arc::clone(&web_root);
+                pool.execute(move || {
+                    if let Err(err) = handle_connection(stream, web_root.as_path()) {
+                        log_error(format_args!("failed to handle connection: {err}"));
+                    }
+                });
+            }
+            Err(err) => log_error(format_args!("failed to accept connection: {err}")),
+        }
     }
 
     Ok(())
 }
 
-/// Délègue une connexion acceptée au thread-pool.
-fn dispatch_stream(stream: TcpStream, pool: &ThreadPool, web_root: &Path) {
-    let web_root = PathBuf::from(web_root);
-
-    pool.execute(move || {
-        if let Err(err) = handle_connection(stream, web_root.as_path()) {
-            log_error(format_args!("failed to handle connection: {err}"));
-        }
-    });
-}
-
 /// Lit la request-line HTTP, résout la page cible puis écrit la réponse.
 fn handle_connection(mut stream: TcpStream, web_root: &Path) -> io::Result<()> {
-    let buf_reader = BufReader::new(&stream);
-    let request_line = match buf_reader.lines().next().transpose()? {
-        Some(line) => line,
-        None => return Ok(()),
-    };
+    let mut request_line = String::new();
+    
+    if BufReader::new(&stream).read_line(&mut request_line)? == 0 {
+        return Ok(());
+    }
 
-    let (status_line, filename) = resolve_route(&request_line, web_root);
-    let contents = fs::read_to_string(filename)?;
+    let request_line = request_line.trim_end_matches(['\r', '\n']);
+
+    let (status_line, filename) = resolve_route(request_line, web_root);
+    let contents = fs::read_to_string(&filename)?;
     let length = contents.len();
 
     let response = format!(

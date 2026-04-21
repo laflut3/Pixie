@@ -57,10 +57,10 @@ pub fn runtime_config() -> io::Result<RuntimeConfig> {
 
     let addr = file_addr(file_config.as_ref()).unwrap_or_else(default_addr);
 
-    let workers = file_config
-        .and_then(|cfg| cfg.workers)
-        .filter(|value| *value > 0)
-        .unwrap_or(DEFAULT_THREADS);
+    let workers = match file_config.and_then(|cfg| cfg.workers) {
+        Some(value) if value > 0 => value,
+        _ => DEFAULT_THREADS,
+    };
 
     Ok(RuntimeConfig { addr, workers })
 }
@@ -71,11 +71,13 @@ fn load_file_config() -> io::Result<Option<FileConfig>> {
         return read_config_if_exists(&path);
     }
 
-    if let Some(cfg) = read_config_if_exists(LOCAL_CONFIG_PATH)? {
-        return Ok(Some(cfg));
+    for path in [LOCAL_CONFIG_PATH, SYSTEM_CONFIG_PATH] {
+        if let Some(config) = read_config_if_exists(path)? {
+            return Ok(Some(config));
+        }
     }
 
-    read_config_if_exists(SYSTEM_CONFIG_PATH)
+    Ok(None)
 }
 
 /// Lit et parse un fichier YAML uniquement s'il existe et s'il s'agit d'un fichier.
@@ -107,11 +109,15 @@ fn read_config_if_exists(path: &str) -> io::Result<Option<FileConfig>> {
 fn file_addr(config: Option<&FileConfig>) -> Option<String> {
     let config = config?;
 
-    config.addr.clone().or_else(|| {
-        (config.host.is_some() || config.port.is_some()).then(|| {
-            let host = config.host.as_deref().unwrap_or(DEFAULT_HOST);
-            let port = config.port.unwrap_or(DEFAULT_PORT);
-            format!("{host}:{port}")
-        })
-    })
+    if let Some(addr) = config.addr.clone() {
+        return Some(addr);
+    }
+
+    if config.host.is_none() && config.port.is_none() {
+        return None;
+    }
+
+    let host = config.host.as_deref().unwrap_or(DEFAULT_HOST);
+    let port = config.port.unwrap_or(DEFAULT_PORT);
+    Some(format!("{host}:{port}"))
 }

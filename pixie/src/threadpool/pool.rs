@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex, mpsc};
 
-use super::{job::Job, worker::Worker};
+use super::{Job, worker::Worker};
 
 /// Pool de threads fixe utilisé pour exécuter des jobs concurrents.
 pub struct ThreadPool {
@@ -34,10 +34,13 @@ impl ThreadPool {
     where
         F: FnOnce() + Send + 'static,
     {
-        let sender = self.sender.as_ref().expect("thread pool sender is missing");
+        let Some(sender) = self.sender.as_ref() else {
+            crate::logger::log_warn(format_args!("thread pool is shutting down; dropping job"));
+            return;
+        };
 
         if let Err(err) = sender.send(Box::new(f)) {
-            eprintln!("[pixie][error] failed to send job to worker: {err}");
+            crate::logger::log_error(format_args!("failed to send job to worker: {err}"));
         }
     }
 }
