@@ -1,3 +1,11 @@
+pixie (1.1.0-6) unstable; urgency=medium
+
+  * Fix Debian Rust build path resolution in `debian/rules`:
+    - resolve `--manifest-path` at runtime in each `dh_auto_*` override
+    - support both source layouts (`./pixie` and `./`) during clean/build/test.
+
+ -- Léo Torres <leo0609leo@gmail.com>  Tue, 21 Apr 2026 13:30:00 +0200
+
 pixie (1.1.0-5) unstable; urgency=medium
 
   * Fix `uscan --repack` for GitHub releases without detached tarball
