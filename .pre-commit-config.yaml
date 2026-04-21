@@ -16,3 +16,4 @@ repos:
         pass_filenames: false
         files: ^pixie/(src/|tests/|Cargo\.toml|Cargo\.lock)
         stages: [pre-commit]
+

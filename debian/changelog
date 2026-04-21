@@ -1,3 +1,14 @@
+pixie (1.1.0-5) unstable; urgency=medium
+
+  * Fix `uscan --repack` for GitHub releases without detached tarball
+    signatures:
+    - drop `pgpsigurlmangle` from `debian/watch`
+    - remove `debian/upstream/signing-key.asc` to avoid false signature warnings
+  * Refresh `debian/patches/debian-changes` against the repacked upstream
+    tarball produced by `uscan`.
+
+ -- Léo Torres <leo0609leo@gmail.com>  Tue, 21 Apr 2026 11:15:00 +0200
+
 pixie (1.1.0-4) unstable; urgency=medium
 
   * Build Rust package fully offline:
