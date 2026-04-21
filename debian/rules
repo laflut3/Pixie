@@ -2,20 +2,29 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export CARGO_HOME = $(CURDIR)/debian/cargo_home
+export CARGO_TARGET_DIR = $(CURDIR)/debian/cargo_target
 export RUSTC = /usr/bin/rustc
 export RUSTDOC = /usr/bin/rustdoc
+
+ifeq ($(wildcard pixie/Cargo.toml),pixie/Cargo.toml)
+CRATE_MANIFEST = pixie/Cargo.toml
+else ifeq ($(wildcard Cargo.toml),Cargo.toml)
+CRATE_MANIFEST = Cargo.toml
+else
+$(error Could not find Cargo.toml in either ./pixie/ or ./)
+endif
 
 %:
 	dh $@ --buildsystem cargo --with cargo
 
 override_dh_auto_clean:
-	dh_auto_clean -- --manifest-path pixie/Cargo.toml
+	dh_auto_clean -- --manifest-path $(CRATE_MANIFEST)
 
 override_dh_auto_build:
-	dh_auto_build -- --manifest-path pixie/Cargo.toml --release --locked --offline
+	dh_auto_build -- --manifest-path $(CRATE_MANIFEST) --release --locked --offline
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	dh_auto_test -- --manifest-path pixie/Cargo.toml --locked --offline --lib --bins
-	dh_auto_test -- --manifest-path pixie/Cargo.toml --locked --offline --test config_tests --test logger_tests --test router_tests --test threadpool_tests
+	dh_auto_test -- --manifest-path $(CRATE_MANIFEST) --locked --offline --lib --bins
+	dh_auto_test -- --manifest-path $(CRATE_MANIFEST) --locked --offline --test config_tests --test logger_tests --test router_tests --test threadpool_tests
 endif
