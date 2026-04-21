@@ -2,6 +2,8 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export CARGO_HOME = $(CURDIR)/debian/cargo_home
+export RUSTC = /usr/bin/rustc
+export RUSTDOC = /usr/bin/rustdoc
 
 %:
 	dh $@ --buildsystem cargo --with cargo
