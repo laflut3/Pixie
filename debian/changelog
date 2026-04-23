@@ -1,3 +1,14 @@
+pixie (1.1.0-7) unstable; urgency=medium
+
+  * Fix Debian build failure on mentors by making Cargo manifest
+    detection deterministic in `debian/rules`:
+    - resolve manifest path once with Make (`wildcard`) instead of
+      shell runtime checks
+    - fail early with a clear error when no `Cargo.toml` is present
+    - reuse the same manifest path for clean/build/test overrides.
+
+ -- Léo Torres <leo0609leo@gmail.com>  Thu, 23 Apr 2026 11:15:00 +0200
+
 pixie (1.1.0-6) unstable; urgency=medium
 
   * Fix Debian Rust build path resolution in `debian/rules`:

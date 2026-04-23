@@ -6,25 +6,22 @@ export CARGO_TARGET_DIR = $(CURDIR)/debian/cargo_target
 export RUSTC = /usr/bin/rustc
 export RUSTDOC = /usr/bin/rustdoc
 
+CARGO_MANIFEST := $(firstword $(wildcard pixie/Cargo.toml Cargo.toml))
+ifeq ($(strip $(CARGO_MANIFEST)),)
+$(error Unable to locate Cargo manifest (expected pixie/Cargo.toml or Cargo.toml))
+endif
+
 %:
 	dh $@ --buildsystem cargo --with cargo
 
 override_dh_auto_clean:
-	manifest=$$(if [ -f pixie/Cargo.toml ]; then echo pixie/Cargo.toml; elif [ -f Cargo.toml ]; then echo Cargo.toml; else echo ""; fi); \
-	test -n "$$manifest"; \
-	dh_auto_clean -- --manifest-path "$$manifest"
+	dh_auto_clean -- --manifest-path "$(CARGO_MANIFEST)"
 
 override_dh_auto_build:
-	manifest=$$(if [ -f pixie/Cargo.toml ]; then echo pixie/Cargo.toml; elif [ -f Cargo.toml ]; then echo Cargo.toml; else echo ""; fi); \
-	test -n "$$manifest"; \
-	dh_auto_build -- --manifest-path "$$manifest" --release --locked --offline
+	dh_auto_build -- --manifest-path "$(CARGO_MANIFEST)" --release --locked --offline
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	manifest=$$(if [ -f pixie/Cargo.toml ]; then echo pixie/Cargo.toml; elif [ -f Cargo.toml ]; then echo Cargo.toml; else echo ""; fi); \
-	test -n "$$manifest"; \
-	dh_auto_test -- --manifest-path "$$manifest" --locked --offline --lib --bins
-	manifest=$$(if [ -f pixie/Cargo.toml ]; then echo pixie/Cargo.toml; elif [ -f Cargo.toml ]; then echo Cargo.toml; else echo ""; fi); \
-	test -n "$$manifest"; \
-	dh_auto_test -- --manifest-path "$$manifest" --locked --offline --test config_tests --test logger_tests --test router_tests --test threadpool_tests
+	dh_auto_test -- --manifest-path "$(CARGO_MANIFEST)" --locked --offline --lib --bins
+	dh_auto_test -- --manifest-path "$(CARGO_MANIFEST)" --locked --offline --test config_tests --test logger_tests --test router_tests --test threadpool_tests
 endif
