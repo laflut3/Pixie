@@ -21,4 +21,4 @@ jobs:
           toolchain: 1.94
 
       - name: Test
-        run: cargo test
+        run: cargo test --locked

@@ -1,0 +1,75 @@
+name: Publish APT repository
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pixie-apt-pages
+  cancel-in-progress: false
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check release version
+        run: |
+          cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
+          tag_version="${GITHUB_REF_NAME#v}"
+          test "$tag_version" = "$cargo_version" || { echo "Tag $GITHUB_REF_NAME does not match Cargo version $cargo_version" >&2; exit 1; }
+      - name: Build Debian package
+        run: infrastructure/scripts/build-deb.sh
+      - uses: actions/upload-artifact@v6
+        with:
+          name: pixie-${{ matrix.arch }}
+          path: pixie_*_${{ matrix.arch }}.deb
+          if-no-files-found: error
+
+  publish:
+    needs: package
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install repository tools
+        run: sudo apt-get update && sudo apt-get install -y apt-utils gnupg
+      - uses: actions/download-artifact@v6
+        with:
+          path: packages
+          pattern: pixie-*
+          merge-multiple: true
+      - name: Build and sign APT repository
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          APT_GPG_KEY_ID: ${{ vars.APT_GPG_KEY_ID }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: infrastructure/apt/build-repository.sh packages public
+      - name: Create GitHub release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${GITHUB_REF_NAME:-manual-${GITHUB_SHA::7}}"
+          gh release create "$tag" packages/*.deb --title "Pixie ${tag}" --notes "Pixie Debian packages for amd64 and arm64." --target "$GITHUB_SHA" || \
+            gh release upload "$tag" packages/*.deb --clobber
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v4

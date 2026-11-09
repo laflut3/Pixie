@@ -1,109 +1,42 @@
-# Fonctionnement Du Code
+# Application architecture
 
-## Vue D'ensemble
+Pixie is a static HTTP server written in Rust. It loads YAML configuration, listens on a TCP address, maps routes to HTML files, and uses a worker pool to handle connections.
 
-Pixie est un serveur HTTP statique en Rust base sur:
+## Entry point
 
-- resolution de configuration YAML
-- ecoute TCP
-- routing de pages statiques HTML
-- thread pool pour traiter les connexions
+`src/main.rs` loads the runtime configuration and starts the server. Run locally from the repository root with `PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked`.
 
-## Point D'entree
-
-Fichier: `/pixie/src/main.rs`
-
-Flux:
-
-1. charge la config runtime via `runtime_config()`
-2. lance le serveur via `run_server(addr, workers)`
-
-## Modules Principaux
+## Main modules
 
 ### Configuration
 
-Fichier: `/pixie/src/config.rs`
+`src/config.rs` loads configuration from `PIXIE_CONFIG`, then `./config-pixie.yml`, then `/etc/pixie/config-pixie.yml`. It supports `addr`, `host`, `port`, `workers`, and aliases `address` and `nb_worker`, with built-in defaults when no file is available.
 
-Responsabilites:
+### Server and router
 
-- lecture YAML depuis `PIXIE_CONFIG`, puis `./config-pixie.yml`, puis `/etc/pixie/config-pixie.yml`
-- fallback sur valeurs hardcodees (`127.0.0.1:80`, `workers=4`)
-- prise en charge des cles `addr`, `host`, `port`, `workers`, alias `address` et `nb_worker`
+`src/server.rs` binds the configured TCP address, accepts connections, and writes HTTP responses. `src/router.rs` resolves the web root using `PIXIE_WEB_ROOT` and maps `/` to `hello.html`; missing pages use `404.html` when available.
 
-### Serveur
+### Worker pool and logs
 
-Fichier: `/pixie/src/server.rs`
+`src/threadpool/` contains the message queue and worker lifecycle. `src/logger.rs` provides standardized `info`, `warn`, and `error` output.
 
-Responsabilites:
+## Request flow
 
-- bind TCP sur l'adresse de config
-- creation du pool de workers
-- accept des connexions entrantes
-- lecture de la premiere ligne HTTP et construction de la reponse
+1. A client opens a TCP connection.
+2. The server submits the connection to the worker pool.
+3. The handler reads the HTTP request line.
+4. The router selects an HTML file.
+5. The server returns the status and page content.
 
-### Router
+## Tests and coverage
 
-Fichier: `/pixie/src/router.rs`
+Tests are in `tests/`. Run them from the repository root with `cargo test --locked`. Coverage can be collected with LLVM instrumentation:
 
-Responsabilites:
-
-- resolution du repertoire web (`PIXIE_WEB_ROOT`, fallback local/dev/system)
-- mapping route -> fichier HTML (`/` -> `hello.html`, sinon `<route>.html`)
-- retour 404 avec `404.html` si la page n'existe pas
-
-### Thread Pool
-
-Fichiers:
-
-- `/pixie/src/threadpool/pool.rs`
-- `/pixie/src/threadpool/worker.rs`
-- `/pixie/src/threadpool/job.rs`
-
-Responsabilites:
-
-- file de jobs via canal mpsc
-- workers qui executent les connexions en parallele
-- fermeture propre des threads au drop
-
-### Logs
-
-Fichier: `/pixie/src/logger.rs`
-
-Responsabilites:
-
-- sorties `info`, `warn`, `error` standardisees
-
-## Flux D'une Requete
-
-1. un client ouvre une connexion TCP
-2. `run_server` soumet la connexion au thread pool
-3. `handle_connection` lit la request line
-4. `resolve_route` choisit le fichier HTML
-5. le serveur renvoie une reponse HTTP avec status + contenu
-
-## Tests
-
-Tous les tests sont regroupes dans:
-
-- `/pixie/tests/`
-
-Suites presentes:
-
-- `config_tests.rs`
-- `router_tests.rs`
-- `server_tests.rs`
-- `threadpool_tests.rs`
-- `logger_tests.rs`
-
-## Couverture
-
-Commande recommandee (instrumentation LLVM):
-
-```bash
-cd pixie
+```sh
 cargo clean
 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='pixie-%p-%m.profraw' cargo test
-TOOLBIN="$(rustc --print sysroot)/lib/rustlib/x86_64-unknown-linux-gnu/bin"
+RUST_HOST="$(rustc -vV | sed -n 's/^host: //p')"
+TOOLBIN="$(rustc --print sysroot)/lib/rustlib/${RUST_HOST}/bin"
 "$TOOLBIN/llvm-profdata" merge -sparse pixie-*.profraw -o pixie.profdata
 "$TOOLBIN/llvm-cov" report \
   --object target/debug/deps/config_tests-* \

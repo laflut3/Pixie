@@ -1,0 +1,6 @@
+apiVersion: v2
+name: pixie
+description: A lightweight static HTTP server
+type: application
+version: 0.1.0
+appVersion: "1.1.0"

@@ -24,8 +24,8 @@ jobs:
           set -euo pipefail
 
           if [ -z "${GH_TOKEN}" ]; then
-            echo "Secret WIKI_TOKEN manquant."
-            echo "Configure un PAT (classic) avec scope 'repo' dans Settings > Secrets and variables > Actions."
+            echo "Missing WIKI_TOKEN secret."
+            echo "Configure a classic PAT with the 'repo' scope in Settings > Secrets and variables > Actions."
             exit 1
           fi
 
@@ -36,7 +36,7 @@ jobs:
             "$API_URL" | jq -r '.has_wiki')"
 
           if [ "$HAS_WIKI" != "true" ]; then
-            echo "Le Wiki GitHub est desactive pour ${REPO}. Active-le dans Settings > General > Features > Wikis."
+            echo "GitHub Wiki is disabled for ${REPO}. Enable it in Settings > General > Features > Wikis."
             exit 1
           fi
 
@@ -44,10 +44,10 @@ jobs:
           WIKI_WEB_URL="https://github.com/${REPO}/wiki"
 
           if ! git ls-remote "$WIKI_URL" >/dev/null 2>&1; then
-            echo "Depot wiki inaccessible: ${REPO}.wiki.git"
-            echo "Actions requises:"
-            echo "1) Ouvre ${WIKI_WEB_URL} et cree une premiere page (initialise le repo wiki)."
-            echo "2) Verifie que WIKI_TOKEN est un PAT classic avec scope 'repo'."
+            echo "Wiki repository is inaccessible: ${REPO}.wiki.git"
+            echo "Required actions:"
+            echo "1) Open ${WIKI_WEB_URL} and create the first page to initialize the wiki repository."
+            echo "2) Verify that WIKI_TOKEN is a classic PAT with the 'repo' scope."
             exit 1
           fi
 

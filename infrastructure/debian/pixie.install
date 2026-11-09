@@ -1,0 +1,3 @@
+debian/cargo_target/release/pixie usr/bin/
+web/*.html usr/share/pixie/web/
+infrastructure/config/config-pixie.yml etc/pixie/

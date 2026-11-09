@@ -1,1 +1,0 @@
-extend-diff-ignore = "(^|/)\\.codex$|(^|/)pixie/target/|(^|/)target/|(^|/)debian/cargo_target/"

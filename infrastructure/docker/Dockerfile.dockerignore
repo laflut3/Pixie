@@ -1,0 +1,10 @@
+.git
+.github
+.codex
+infrastructure/apt-repo
+infrastructure/debian/.debhelper
+infrastructure/debian/tmp
+target
+**/*.deb
+**/*.buildinfo
+**/*.changes

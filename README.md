@@ -1,41 +1,31 @@
 # Pixie
 
-Pixie est un serveur HTTP statique ecrit en Rust.
+Pixie is a lightweight static HTTP server written in Rust. It serves the HTML files in `web/`. The sample deployment configuration listens on `0.0.0.0:8080`.
 
-Version actuelle: `1.1.0`
+## Install
 
-## Installation
+[Quick installation commands](infrastructure/docs/install.md)
 
-### Docker
+## Deployment guides
 
-```bash
-docker pull ghcr.io/laflut3/pixie:latest
-docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest
+- [Docker and Compose](infrastructure/docs/docker.md)
+- [Kubernetes with Helm](infrastructure/docs/kubernetes.md)
+- [APT repository](infrastructure/docs/apt.md)
+- [Install with curl](infrastructure/docs/curl.md)
+- [Build a Debian package](infrastructure/docs/debian-package.md)
+- [Arch Linux](infrastructure/docs/arch.md)
+
+## Development
+
+```sh
+PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked
 ```
 
-### Debian / Ubuntu
+## Project layout
 
-Publication en cours dans les depots officiels Debian.
+- `src/`: Rust library and binary
+- `tests/`: integration tests
+- `web/`: static pages served by Pixie
+- `infrastructure/`: deployment, packaging, and infrastructure documentation
 
-Quand le paquet sera disponible dans la distribution cible:
-
-```bash
-sudo apt update
-sudo apt install -y pixie
-```
-
-Suivi publication Debian: `ITP #1133770`, `RFS #1133771`.
-
-### Arch Linux
-
-```bash
-yay -S pixie-git
-```
-
-Le service est gere automatiquement par le systeme d'installation.
-
-## Securite du depot public
-
-- Ne jamais commiter de cle privee, token, mot de passe ou fichier `.env`.
-- Les artefacts de build/packaging (`*.deb`, `*.dsc`, `*.changes`, `*.buildinfo`, `*.orig.tar.*`) sont ignores par `.gitignore`.
-- Les secrets CI/CD doivent rester dans GitHub Actions Secrets, jamais dans le code.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development checks.
