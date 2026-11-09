@@ -1,49 +1,34 @@
-# Application architecture
+# Architecture and request flow
 
-Pixie is a static HTTP server written in Rust. It loads YAML configuration, listens on a TCP address, maps routes to HTML files, and uses a worker pool to handle connections.
+Pixie serves static HTML files over HTTP. The binary starts the server; the library contains configuration, routing, logging, and worker-pool code.
 
-## Entry point
+## Main components
 
-`src/main.rs` loads the runtime configuration and starts the server. Run locally from the repository root with `PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked`.
-
-## Main modules
-
-### Configuration
-
-`src/config.rs` loads configuration from `PIXIE_CONFIG`, then `./config-pixie.yml`, then `/etc/pixie/config-pixie.yml`. It supports `addr`, `host`, `port`, `workers`, and aliases `address` and `nb_worker`, with built-in defaults when no file is available.
-
-### Server and router
-
-`src/server.rs` binds the configured TCP address, accepts connections, and writes HTTP responses. `src/router.rs` resolves the web root using `PIXIE_WEB_ROOT` and maps `/` to `hello.html`; missing pages use `404.html` when available.
-
-### Worker pool and logs
-
-`src/threadpool/` contains the message queue and worker lifecycle. `src/logger.rs` provides standardized `info`, `warn`, and `error` output.
+| File | Responsibility |
+| --- | --- |
+| `src/main.rs` | Loads runtime configuration and starts the server. |
+| `src/config.rs` | Reads YAML settings and applies defaults. |
+| `src/server.rs` | Accepts TCP connections and writes HTTP responses. |
+| `src/router.rs` | Maps `GET` paths to HTML files. |
+| `src/threadpool/` | Runs connection handlers on worker threads. |
+| `src/logger.rs` | Writes info, warning, and error messages to stderr. |
 
 ## Request flow
 
-1. A client opens a TCP connection.
-2. The server submits the connection to the worker pool.
-3. The handler reads the HTTP request line.
-4. The router selects an HTML file.
-5. The server returns the status and page content.
+1. Pixie accepts a TCP connection.
+2. A worker reads the first HTTP request line.
+3. The router maps `GET /` to `hello.html` and `GET /about` to `about.html`.
+4. A query string is ignored when selecting the page.
+5. Pixie returns the page with `200 OK`, or uses `404.html` with `404 NOT FOUND` when the route is invalid or missing.
 
-## Tests and coverage
+Responses use `Content-Type: text/html; charset=utf-8` and include a content length. The server currently reads only the request line and serves HTML files.
 
-Tests are in `tests/`. Run them from the repository root with `cargo test --locked`. Coverage can be collected with LLVM instrumentation:
+## Web root lookup
 
-```sh
-cargo clean
-RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='pixie-%p-%m.profraw' cargo test
-RUST_HOST="$(rustc -vV | sed -n 's/^host: //p')"
-TOOLBIN="$(rustc --print sysroot)/lib/rustlib/${RUST_HOST}/bin"
-"$TOOLBIN/llvm-profdata" merge -sparse pixie-*.profraw -o pixie.profdata
-"$TOOLBIN/llvm-cov" report \
-  --object target/debug/deps/config_tests-* \
-  --object target/debug/deps/threadpool_tests-* \
-  --object target/debug/deps/router_tests-* \
-  --object target/debug/deps/server_tests-* \
-  --object target/debug/deps/logger_tests-* \
-  --instr-profile pixie.profdata \
-  --ignore-filename-regex '/\\.cargo/registry|/tests/'
-```
+Pixie uses the first available directory in this order:
+
+1. The directory named by `PIXIE_WEB_ROOT`, if it exists.
+2. The repository's `web/` directory.
+3. `/usr/share/pixie/web`.
+
+The development directory is checked before the system directory, so a repository `web/` folder takes precedence when present.

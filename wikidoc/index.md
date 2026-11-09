@@ -1,4 +1,13 @@
 # Pixie documentation
 
-- [Deployment guides for Docker, Kubernetes, APT, curl, and Arch Linux](https://github.com/laflut3/Pixie/blob/main/infrastructure/README.md)
-- [Application architecture](code_fonctionnement.md)
+Pixie is a small Rust server for static HTML pages. Use these pages to understand how it starts, loads configuration, and handles requests.
+
+## Application
+
+- [Architecture and request flow](code_fonctionnement.md)
+- [Configuration](configuration.md)
+- [Development](development.md)
+
+## Deployment
+
+See the [deployment guides](../infrastructure/README.md) for Docker, Kubernetes, APT, Debian packages, curl, and Arch Linux.
