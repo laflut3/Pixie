@@ -4,7 +4,8 @@ Pixie is a lightweight Rust HTTP server for serving static web pages. It include
 
 ## Project rules
 
-- Keep user-facing documentation in English. Review and update relevant docs with every behavior, configuration, or deployment change.
+- Keep documentation in English as a responsive static site in `docs/` (plain HTML/CSS/JS, no build required). Split it into user guides (deploy, use, configure) and feature explanations. Review and update relevant pages with every behavior, configuration, or deployment change.
+- Keep the README focused on deployment methods and the documentation link. Use shared site styles and navigation; keep examples accurate and planned features clearly labeled.
 - Run only checks that provide evidence for the change. Avoid unrelated or repetitive verification.
 - Choose the least expensive model that can reliably complete each task; reserve stronger models for work that needs them.
 - Keep the design and dependencies simple. Add an abstraction or dependency only when it solves a concrete need.

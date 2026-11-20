@@ -61,6 +61,8 @@ jobs:
           APT_GPG_KEY_ID: ${{ vars.APT_GPG_KEY_ID }}
           APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
         run: infrastructure/apt/build-repository.sh packages public
+      - name: Include static documentation
+        run: cp -R docs public/docs
       - name: Create GitHub release assets
         env:
           GH_TOKEN: ${{ github.token }}

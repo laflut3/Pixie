@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Use separate Pixie processes and a front proxy when you need NGINX-style virtual hosting."><meta name="theme-color" content="#f5f8ff"><title>One domain. One site. — Pixie docs</title><link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/style.css"><script src="assets/site.js" defer></script></head>
+<body><a class="skip" href="#content">Skip to content</a><header class="topbar"><a class="brand" href="index.html"><img src="assets/mark.svg" width="32" height="32" alt=""><span>pixie<span class="brand-sub"> / docs</span></span></a><div class="top-actions"><span class="version">SOURCE GUIDE</span><a href="https://github.com/laflut3/Pixie">GitHub ↗</a><button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button></div></header><div class="layout"><aside id="sidebar" class="sidebar"><nav aria-label="Documentation"><div class="nav-group"><p>Start here</p><a href="index.html">Small server. Clear docs</a></div><div class="nav-group"><p>User guide</p><a href="deploy.html">Choose your deployment</a><a href="configure.html">One file. A few options</a><a href="serve.html">Put your pages online</a><a href="security.html">HTTPS, with client trust</a><a aria-current="page" href="sites.html">One domain. One site</a></div><div class="nav-group"><p>How it works</p><a href="architecture.html">Follow the request</a></div><div class="nav-group"><p>Documentation</p><a href="publish.html">Static files. Ready to host</a></div></nav><div class="sidebar-foot"><span class="status-dot"></span>Small Rust HTTP server</div></aside><main id="content" tabindex="-1"><div class="eyebrow">User guide</div><h1>One domain. One site.</h1><p class="lead">Use separate Pixie processes and a front proxy when you need NGINX-style virtual hosting.</p><article><h2 id="model">How multiple sites work today</h2><p>Pixie has one web root and one listener per process. It does not select a root from the Host header, provide server blocks, proxy upstreams, or rewrite path prefixes. Run an instance per site on a different local port, then route domains through NGINX.</p><div class="flow" aria-label="Request routing">Browser <span>→</span> NGINX :80 <span>→</span> Pixie :8081 / :8082</div><h2 id="instances">Start two instances</h2><p>Create <code>/srv/pixie/alpha</code> and <code>/srv/pixie/beta</code>, each with <code>hello.html</code> and <code>404.html</code>. Save two configs:</p><pre><code># /etc/pixie/alpha.yml
+addr: 127.0.0.1:8081
+workers: 4
+
+# /etc/pixie/beta.yml
+addr: 127.0.0.1:8082
+workers: 4</code></pre><p>Run these in separate terminals for a local demonstration. A production service manager should keep both processes running.</p><pre><code>PIXIE_CONFIG=/etc/pixie/alpha.yml PIXIE_WEB_ROOT=/srv/pixie/alpha pixie
+# In another terminal:
+PIXIE_CONFIG=/etc/pixie/beta.yml PIXIE_WEB_ROOT=/srv/pixie/beta pixie</code></pre><h2 id="nginx">Route domains with NGINX</h2><p>After installing NGINX, add these blocks to its site configuration. Replace the example domains and point their DNS records at the host.</p><pre><code>server {
+    listen 80;
+    server_name alpha.example.com;
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_set_header Host $host;
+    }
+}
+
+server {
+    listen 80;
+    server_name beta.example.com;
+    location / {
+        proxy_pass http://127.0.0.1:8082;
+        proxy_set_header Host $host;
+    }
+}</code></pre><pre><code>sudo nginx -t
+sudo systemctl reload nginx
+curl -H &quot;Host: alpha.example.com&quot; http://127.0.0.1/</code></pre><p>This example uses HTTP on the front proxy. Configure its certificates and HTTPS listener for public HTTPS, or configure HTTPS on each Pixie instance as described in <a href="security.html">TLS &amp; mTLS</a>.</p><h2 id="paths">Serve sites under path prefixes</h2><p>A proxy can strip the prefix before forwarding to the matching instance:</p><pre><code>location /alpha/ {
+    proxy_pass http://127.0.0.1:8081/;
+    proxy_set_header Host $host;
+}
+location /beta/ {
+    proxy_pass http://127.0.0.1:8082/;
+    proxy_set_header Host $host;
+}</code></pre><p>The trailing slash on proxy_pass strips the matched prefix: <code>/alpha/about</code> reaches Pixie as <code>/about</code>. Use prefix-aware or relative links in your HTML. General asset serving remains outside the current Pixie router.</p></article><footer>Pixie documentation <span>Built from the source. Updated with the features.</span></footer></main><aside class="toc"><p>ON THIS PAGE</p><nav aria-label="On this page"><a href="#model">How multiple sites work today</a><a href="#instances">Start two instances</a><a href="#nginx">Route domains with NGINX</a><a href="#paths">Serve sites under path prefixes</a></nav></aside></div></body></html>
