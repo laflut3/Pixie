@@ -78,3 +78,36 @@ fn serveur_journalise_une_erreur_si_404_est_absent() {
     assert!(response_404.starts_with("HTTP/1.1 404 Not Found"));
     assert!(response_404.contains("Not Found"));
 }
+
+#[test]
+fn server_selects_host_and_sends_asset_headers_for_head() {
+    let _lock = env_lock();
+    let sites = TempDir::new("pixie-server-sites");
+    std::fs::create_dir(sites.path.join("default")).unwrap();
+    std::fs::create_dir(sites.path.join("example.test")).unwrap();
+    sites.write("default/index.html", "fallback");
+    sites.write("example.test/index.html", "named host");
+    sites.write("example.test/app.css", "body { color: red }");
+    let _web = EnvGuard::set("PIXIE_WEB_ROOT", "");
+    let _sites = EnvGuard::set("PIXIE_SITES_ROOT", sites.path.to_str().unwrap());
+    let addr = format!("127.0.0.1:{}", reserve_local_port());
+    let listen = addr.clone();
+    thread::spawn(move || {
+        let _ = run_server(&listen, 1);
+    });
+    wait_for_server(&addr, Duration::from_secs(3));
+    let named =
+        send_http_request(&addr, "GET / HTTP/1.1\r\nHost: EXAMPLE.test:8080\r\n\r\n").unwrap();
+    assert!(named.contains("named host"));
+    let head = send_http_request(
+        &addr,
+        "HEAD /app.css HTTP/1.1\r\nHost: example.test\r\n\r\n",
+    )
+    .unwrap();
+    assert!(
+        head.to_ascii_lowercase()
+            .contains("content-type: text/css; charset=utf-8")
+    );
+    assert!(head.to_ascii_lowercase().contains("content-length: 19"));
+    assert!(!head.contains("color: red"));
+}

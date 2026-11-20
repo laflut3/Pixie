@@ -25,6 +25,8 @@ size = $(du -sb "$WORK" | cut -f1)
 arch = ${ARCH}
 license = MIT
 backup = etc/pixie/config-pixie.yml
+backup = etc/pixie/sites/default/hello.html
+backup = etc/pixie/sites/default/404.html
 EOF
 mkdir -p "$OUTPUT"
 tar --owner=0 --group=0 --zstd -cf "$OUTPUT/pixie-${VERSION}-1-${ARCH}.pkg.tar.zst" -C "$WORK" .PKGINFO usr etc

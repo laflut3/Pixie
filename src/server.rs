@@ -1,6 +1,6 @@
 //! Pixie static HTTP/1.x and HTTP/2 server.
 
-use std::{fs, io, net::SocketAddr, path::PathBuf, sync::Arc, time::Duration};
+use std::{io, net::SocketAddr, sync::Arc, time::Duration};
 
 use bytes::Bytes;
 use http_body_util::Full;
@@ -18,7 +18,8 @@ use tokio::{
 use crate::{
     TlsConfig,
     logger::{log_error, log_info},
-    router::{resolve_route, resolve_web_root},
+    router::read_response,
+    sites::Sites,
     tls::load_server_config,
 };
 
@@ -44,7 +45,7 @@ pub fn run_server_with_protocols(
             .expect("new TLS config is uniquely owned")
             .alpn_protocols = vec![b"h2".to_vec(), b"http/1.1".to_vec()];
     }
-    let web_root = resolve_web_root();
+    let sites = Sites::from_env();
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(pool_size.max(1))
         .enable_all()
@@ -63,7 +64,7 @@ pub fn run_server_with_protocols(
                 quinn::ServerConfig::with_crypto(Arc::new(crypto)),
                 http3_addr.parse().map_err(io::Error::other)?,
             )?;
-            let root = web_root.clone();
+            let root = sites.clone();
             tokio::spawn(async move {
                 log_info(format_args!(
                     "HTTP/3 listening on {http3_addr} (experimental)"
@@ -85,14 +86,30 @@ pub fn run_server_with_protocols(
                                     if let Ok((request, mut stream)) =
                                         resolver.resolve_request().await
                                     {
-                                        let (status, body) = h3_response(
+                                        let result = read_response(
                                             request.method().as_str(),
                                             request.uri().path(),
+                                            request.uri().authority().map(|a| a.as_str()).or_else(
+                                                || {
+                                                    request
+                                                        .headers()
+                                                        .get(hyper::header::HOST)
+                                                        .and_then(|h| h.to_str().ok())
+                                                },
+                                            ),
                                             &root,
                                         );
+                                        let length = result.body.len();
+                                        let body = if request.method() == hyper::Method::HEAD {
+                                            Vec::new()
+                                        } else {
+                                            result.body
+                                        };
                                         let response = hyper::Response::builder()
-                                            .status(status)
-                                            .header("content-type", "text/html; charset=utf-8")
+                                            .status(result.status)
+                                            .header("content-type", result.content_type)
+                                            .header("content-length", length)
+                                            .header("x-content-type-options", "nosniff")
                                             .body(())
                                             .unwrap();
                                         if stream.send_response(response).await.is_ok() {
@@ -111,11 +128,11 @@ pub fn run_server_with_protocols(
         log_info(format_args!(
             "listening on {addr} with {pool_size} workers, http/1 + http/2, tls={} (web_root={})",
             tls_config.is_some(),
-            web_root.display()
+            sites.directory().display()
         ));
         loop {
             let (stream, peer) = listener.accept().await?;
-            let root = web_root.clone();
+            let root = sites.clone();
             let tls = tls_config.clone();
             tokio::spawn(async move {
                 if let Err(err) = serve_connection(stream, peer, root, tls).await {
@@ -126,24 +143,10 @@ pub fn run_server_with_protocols(
     })
 }
 
-fn h3_response(method: &str, path: &str, root: &std::path::Path) -> (u16, Vec<u8>) {
-    if method != "GET" && method != "HEAD" {
-        return (405, b"Method not allowed".to_vec());
-    }
-    let (status, file) = resolve_route(&format!("GET {path} HTTP/1.1"), root);
-    match fs::read(file) {
-        Ok(bytes) if status.contains("200") => {
-            (200, if method == "HEAD" { Vec::new() } else { bytes })
-        }
-        Ok(_) => (404, b"Not Found".to_vec()),
-        Err(_) => (404, b"Not Found".to_vec()),
-    }
-}
-
 async fn serve_connection(
     stream: tokio::net::TcpStream,
     _peer: SocketAddr,
-    root: PathBuf,
+    root: Sites,
     tls: Option<Arc<rustls::ServerConfig>>,
 ) -> io::Result<()> {
     stream.set_nodelay(true)?;
@@ -167,10 +170,7 @@ async fn serve_connection(
 trait AsyncIo: AsyncRead + AsyncWrite + Unpin + Send {}
 impl<T: AsyncRead + AsyncWrite + Unpin + Send> AsyncIo for T {}
 
-async fn respond(
-    req: Request<Incoming>,
-    root: PathBuf,
-) -> Result<Response<Full<Bytes>>, io::Error> {
+async fn respond(req: Request<Incoming>, root: Sites) -> Result<Response<Full<Bytes>>, io::Error> {
     let method = req.method().clone();
     let http_version = req.version();
     if method != hyper::Method::GET && method != hyper::Method::HEAD {
@@ -182,31 +182,14 @@ async fn respond(
         close_http1(&mut response, http_version);
         return Ok(response);
     }
-    let target = req.uri().path();
-    let request_line = format!("GET {target} HTTP/1.1");
-    let (status, file) = resolve_route(&request_line, &root);
-    let body = match fs::read(&file) {
-        Ok(bytes) => bytes,
-        Err(_) if status.contains("404") => {
-            return Ok(response(
-                StatusCode::NOT_FOUND,
-                "Not Found",
-                method == hyper::Method::HEAD,
-            ));
-        }
-        Err(_) => {
-            return Ok(response(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Internal Server Error",
-                method == hyper::Method::HEAD,
-            ));
-        }
-    };
-    let status = if status.contains("200") {
-        StatusCode::OK
-    } else {
-        StatusCode::NOT_FOUND
-    };
+    let host = req.uri().authority().map(|a| a.as_str()).or_else(|| {
+        req.headers()
+            .get(hyper::header::HOST)
+            .and_then(|h| h.to_str().ok())
+    });
+    let result = read_response(method.as_str(), req.uri().path(), host, &root);
+    let body = result.body;
+    let status = StatusCode::from_u16(result.status).unwrap();
     let length = body.len();
     let mut response = Response::new(Full::new(if method == hyper::Method::HEAD {
         Bytes::new()
@@ -216,12 +199,15 @@ async fn respond(
     *response.status_mut() = status;
     response.headers_mut().insert(
         hyper::header::CONTENT_TYPE,
-        "text/html; charset=utf-8".parse().unwrap(),
+        result.content_type.parse().unwrap(),
     );
     response.headers_mut().insert(
         hyper::header::CONTENT_LENGTH,
         length.to_string().parse().unwrap(),
     );
+    response
+        .headers_mut()
+        .insert("x-content-type-options", "nosniff".parse().unwrap());
     close_http1(&mut response, http_version);
     Ok(response)
 }

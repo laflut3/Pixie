@@ -10,7 +10,7 @@ url="https://github.com/laflut3/Pixie"
 license=('MIT')
 depends=('glibc' 'systemd')
 makedepends=('cargo' 'git')
-backup=('etc/pixie/config-pixie.yml')
+backup=('etc/pixie/config-pixie.yml' 'etc/pixie/sites/default/hello.html' 'etc/pixie/sites/default/404.html')
 source=("${_pkgname}::git+https://github.com/laflut3/Pixie.git")
 sha256sums=('SKIP')
 
@@ -46,6 +46,8 @@ package() {
 
   install -dm755 "${pkgdir}/usr/share/pixie/web"
   install -m644 web/*.html "${pkgdir}/usr/share/pixie/web/"
+  install -dm755 "${pkgdir}/etc/pixie/sites/default"
+  install -m644 web/*.html "${pkgdir}/etc/pixie/sites/default/"
 
   install -Dm644 infrastructure/config/config-pixie.yml "${pkgdir}/etc/pixie/config-pixie.yml"
   install -Dm644 infrastructure/debian/pixie.service "${pkgdir}/usr/lib/systemd/system/pixie.service"

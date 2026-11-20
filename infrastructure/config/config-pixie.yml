@@ -4,3 +4,7 @@ workers: 4
 # Optional experimental HTTP/3 listener (requires TLS credentials below).
 # http3:
 #   addr: 0.0.0.0:8443
+
+# Sites: /etc/pixie/sites/default and /etc/pixie/sites/<hostname>.
+# Override with PIXIE_SITES_ROOT, or PIXIE_WEB_ROOT for one site.
+# Set PIXIE_SPA_FALLBACK=true for React client-side routes.

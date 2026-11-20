@@ -13,6 +13,8 @@ install -Dm644 "$ROOT/infrastructure/config/config-pixie.yml" "$WORK/etc/pixie/c
 install -Dm644 "$ROOT/infrastructure/debian/pixie.service" "$WORK/usr/lib/systemd/system/pixie.service"
 install -d "$WORK/usr/share/pixie/web"
 install -m644 "$ROOT"/web/*.html "$WORK/usr/share/pixie/web/"
+install -d "$WORK/etc/pixie/sites/default"
+install -m644 "$ROOT"/web/*.html "$WORK/etc/pixie/sites/default/"
 install -Dm644 "$ROOT/LICENSE" "$WORK/usr/share/licenses/pixie/LICENSE"
 mkdir -p "$OUTPUT"
 tar --owner=0 --group=0 -czf "$OUTPUT/pixie_${VERSION}_linux_${ARCH}.tar.gz" -C "$WORK" usr etc

@@ -18,10 +18,11 @@ RUN apt-get update \
 
 COPY --from=builder /app/target/release/pixie /usr/local/bin/pixie
 COPY web /usr/share/pixie/web
+COPY web /etc/pixie/sites/default
 COPY infrastructure/config/config-pixie.yml /etc/pixie/config-pixie.yml
 
 ENV PIXIE_CONFIG=/etc/pixie/config-pixie.yml
-ENV PIXIE_WEB_ROOT=/usr/share/pixie/web
+ENV PIXIE_SITES_ROOT=/etc/pixie/sites
 
 EXPOSE 8080
 EXPOSE 8443/udp

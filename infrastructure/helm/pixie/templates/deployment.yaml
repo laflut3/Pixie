@@ -29,7 +29,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: {{ regexFind "[0-9]+$" .Values.config.addr | int }}
               protocol: TCP
             {{- if .Values.http3.enabled }}
             - name: http3
@@ -39,15 +39,15 @@ spec:
           env:
             - name: PIXIE_CONFIG
               value: /etc/pixie/config-pixie.yml
-            - name: PIXIE_WEB_ROOT
-              value: /usr/share/pixie/web
+            - name: PIXIE_SITES_ROOT
+              value: {{ .Values.sites.root | quote }}
+            - name: PIXIE_SPA_FALLBACK
+              value: {{ .Values.sites.spaFallback | quote }}
           readinessProbe:
-            httpGet:
-              path: /hello
+            tcpSocket:
               port: http
           livenessProbe:
-            httpGet:
-              path: /hello
+            tcpSocket:
               port: http
           securityContext:
             allowPrivilegeEscalation: false
@@ -58,8 +58,14 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: config
-              mountPath: /etc/pixie
+              mountPath: /etc/pixie/config-pixie.yml
+              subPath: config-pixie.yml
               readOnly: true
+            {{- if .Values.sites.existingClaim }}
+            - name: sites
+              mountPath: {{ .Values.sites.root | quote }}
+              readOnly: true
+            {{- end }}
             {{- if .Values.tls.enabled }}
             - name: tls
               mountPath: /etc/pixie/tls
@@ -69,6 +75,11 @@ spec:
         - name: config
           configMap:
             name: {{ include "pixie.fullname" . }}-config
+        {{- if .Values.sites.existingClaim }}
+        - name: sites
+          persistentVolumeClaim:
+            claimName: {{ .Values.sites.existingClaim | quote }}
+        {{- end }}
         {{- if .Values.tls.enabled }}
         - name: tls
           secret:

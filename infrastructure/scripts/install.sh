@@ -41,7 +41,7 @@ else
   ARCHIVE="$WORK/$NAME"
 fi
 mkdir "$WORK/payload"
-tar -xzf "$ARCHIVE" -C "$WORK/payload" usr/bin/pixie etc/pixie/config-pixie.yml usr/share/pixie/web usr/lib/systemd/system/pixie.service usr/share/licenses/pixie/LICENSE
+tar -xzf "$ARCHIVE" -C "$WORK/payload" usr/bin/pixie etc/pixie/config-pixie.yml etc/pixie/sites/default usr/share/pixie/web usr/lib/systemd/system/pixie.service usr/share/licenses/pixie/LICENSE
 run() {
   if [ "$(id -u)" -eq 0 ] || [ -n "$PREFIX" ]; then "$@"; else sudo "$@"; fi
 }
@@ -55,6 +55,12 @@ run install -d "$PREFIX/usr/share/pixie/web"
 for PAGE in "$WORK/payload/usr/share/pixie/web/"*.html; do
   if [ ! -e "$PREFIX/usr/share/pixie/web/$(basename "$PAGE")" ]; then
     run install -m644 "$PAGE" "$PREFIX/usr/share/pixie/web/"
+  fi
+done
+run install -d "$PREFIX/etc/pixie/sites/default"
+for PAGE in "$WORK/payload/etc/pixie/sites/default/"*.html; do
+  if [ ! -e "$PREFIX/etc/pixie/sites/default/$(basename "$PAGE")" ]; then
+    run install -m644 "$PAGE" "$PREFIX/etc/pixie/sites/default/"
   fi
 done
 if [ -z "$PREFIX" ] && command -v systemctl >/dev/null && [ -d /run/systemd/system ]; then
