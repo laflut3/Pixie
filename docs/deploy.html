@@ -1,17 +1,134 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Start locally, run a container, or use the Linux and Kubernetes packaging in this repository."><meta name="theme-color" content="#f5f8ff"><title>Choose your deployment. — Pixie docs</title><link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/style.css"><script src="assets/site.js" defer></script></head>
-<body><a class="skip" href="#content">Skip to content</a><header class="topbar"><a class="brand" href="index.html"><img src="assets/mark.svg" width="32" height="32" alt=""><span>pixie<span class="brand-sub"> / docs</span></span></a><div class="top-actions"><span class="version">SOURCE GUIDE</span><a href="https://github.com/laflut3/Pixie">GitHub ↗</a><button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button></div></header><div class="layout"><aside id="sidebar" class="sidebar"><nav aria-label="Documentation"><div class="nav-group"><p>Start here</p><a href="index.html">Small server. Clear docs</a></div><div class="nav-group"><p>User guide</p><a aria-current="page" href="deploy.html">Choose your deployment</a><a href="configure.html">One file. A few options</a><a href="serve.html">Put your pages online</a><a href="security.html">HTTPS, with client trust</a><a href="sites.html">One domain. One site</a></div><div class="nav-group"><p>How it works</p><a href="architecture.html">Follow the request</a></div><div class="nav-group"><p>Documentation</p><a href="publish.html">Static files. Ready to host</a></div></nav><div class="sidebar-foot"><span class="status-dot"></span>Small Rust HTTP server</div></aside><main id="content" tabindex="-1"><div class="eyebrow">User guide</div><h1>Choose your deployment.</h1><p class="lead">Start locally, run a container, or use the Linux and Kubernetes packaging in this repository.</p><article><h2 id="docker">Docker</h2><p>Docker is the shortest path to the sample site. The image is published for amd64 and arm64.</p><pre><code>docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest</code></pre><p>From a repository checkout, build the current source or use Compose:</p><pre><code>docker build -f infrastructure/docker/Dockerfile -t pixie:local .
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Start locally, run a container, or use the Linux and Kubernetes packaging in this repository.">
+<meta name="theme-color" content="#f5f8ff">
+<title>Choose your deployment. — Pixie docs</title>
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/site.js" defer>
+</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+<a class="brand" href="index.html">
+<img src="assets/mark.svg" width="32" height="32" alt="">
+<span>pixie<span class="brand-sub"> / docs</span>
+</span>
+</a>
+<div class="top-actions">
+<span class="version">SOURCE GUIDE</span>
+<a href="https://github.com/laflut3/Pixie">GitHub ↗</a>
+<button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</div>
+</header>
+<div class="layout">
+<aside id="sidebar" class="sidebar">
+<nav aria-label="Documentation">
+<div class="nav-group">
+<p>Start here</p>
+<a href="index.html">Overview</a>
+</div>
+<div class="nav-group">
+<p>User guide</p>
+<a aria-current="page" href="deploy.html">Deploy Pixie</a>
+<a href="configure.html">Configuration</a>
+<a href="serve.html">Serve a website</a>
+<a href="security.html">TLS &amp; mTLS</a>
+<a href="sites.html">Multiple sites</a>
+</div>
+<div class="nav-group">
+<p>How it works</p>
+<a href="architecture.html">Request flow</a>
+<a href="feature-http.html">HTTP handling</a>
+<a href="feature-routing.html">Routing &amp; files</a>
+<a href="feature-runtime.html">Runtime &amp; TLS</a>
+</div>
+<div class="nav-group">
+<p>Documentation</p>
+<a href="publish.html">Host the documentation</a>
+</div>
+</nav>
+<div class="sidebar-foot">
+<span class="status-dot">
+</span>Small Rust HTTP server</div>
+</aside>
+<main id="content" tabindex="-1">
+<div class="eyebrow">User guide</div>
+<h1>Choose your deployment.</h1>
+<p class="lead">Start locally, run a container, or use the Linux and Kubernetes packaging in this repository.</p>
+<article>
+<h2 id="docker">Docker</h2>
+<p>Docker is the shortest path to the sample site. The image is published for amd64 and arm64.</p>
+<pre>
+<code>docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest</code>
+</pre>
+<p>From a repository checkout, build the current source or use Compose:</p>
+<pre>
+<code>docker build -f infrastructure/docker/Dockerfile -t pixie:local .
 docker run --rm -p 8080:8080 pixie:local
 
 # Or use the published image through Compose
-docker compose -f infrastructure/docker/compose.yaml up -d</code></pre><p>Compose mounts <code>infrastructure/config/config-pixie.yml</code>. Stop it with <code>docker compose -f infrastructure/docker/compose.yaml down</code>.</p><h2 id="cargo">Local Cargo build</h2><p>Run these commands in the repository root with the Rust toolchain required by <code>Cargo.toml</code>.</p><pre><code>PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked</code></pre><p>The supplied config listens on <code>0.0.0.0:8080</code>. The repository's <code>web/</code> supplies the pages.</p><h2 id="linux">Debian / Ubuntu and Arch Linux</h2><p>The Debian/Ubuntu installer configures the signed APT repository. It supports amd64 and arm64. Review the installer before running it:</p><pre><code>curl -fsSLo install-pixie.sh https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/apt/install.sh
+docker compose -f infrastructure/docker/compose.yaml up -d</code>
+</pre>
+<p>Compose mounts <code>infrastructure/config/config-pixie.yml</code>. Stop it with <code>docker compose -f infrastructure/docker/compose.yaml down</code>.</p>
+<h2 id="cargo">Local Cargo build</h2>
+<p>Run these commands in the repository root with the Rust toolchain required by <code>Cargo.toml</code>.</p>
+<pre>
+<code>PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked</code>
+</pre>
+<p>The supplied config listens on <code>0.0.0.0:8080</code>. The repository's <code>web/</code> supplies the pages.</p>
+<h2 id="linux">Debian / Ubuntu and Arch Linux</h2>
+<p>The Debian/Ubuntu installer configures the signed APT repository. It supports amd64 and arm64. Review the installer before running it:</p>
+<pre>
+<code>curl -fsSLo install-pixie.sh https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/apt/install.sh
 less install-pixie.sh
 bash install-pixie.sh
-sudo systemctl enable --now pixie</code></pre><p>On Arch Linux, use the AUR package (x86_64 or aarch64):</p><pre><code>yay -S pixie-git
-sudo systemctl enable --now pixie</code></pre><p>To build a Debian package locally:</p><pre><code>infrastructure/scripts/build-deb.sh
+sudo systemctl enable --now pixie</code>
+</pre>
+<p>On Arch Linux, use the AUR package (x86_64 or aarch64):</p>
+<pre>
+<code>yay -S pixie-git
+sudo systemctl enable --now pixie</code>
+</pre>
+<p>To build a Debian package locally:</p>
+<pre>
+<code>infrastructure/scripts/build-deb.sh
 sudo apt install ./pixie_*.deb
-sudo systemctl enable --now pixie</code></pre><p>For service logs, use <code>journalctl -u pixie -f</code>. Packaged configuration lives in <code>/etc/pixie/config-pixie.yml</code>.</p><h2 id="kubernetes">Kubernetes with Helm</h2><pre><code>helm upgrade --install pixie infrastructure/helm/pixie \
+sudo systemctl enable --now pixie</code>
+</pre>
+<p>For service logs, use <code>journalctl -u pixie -f</code>. Packaged configuration lives in <code>/etc/pixie/config-pixie.yml</code>.</p>
+<h2 id="kubernetes">Kubernetes with Helm</h2>
+<pre>
+<code>helm upgrade --install pixie infrastructure/helm/pixie \
   --namespace pixie --create-namespace
-kubectl -n pixie port-forward service/pixie-pixie 8080:8080</code></pre><p>The chart exposes a ClusterIP service. Add your own Ingress or Gateway for external traffic. Its current values cover the address, workers, image, service, and resources; custom site files and TLS secrets need explicit volume mounts in your deployment.</p><h2 id="check">Check your endpoint</h2><pre><code>curl -i http://localhost:8080/
+kubectl -n pixie port-forward service/pixie-pixie 8080:8080</code>
+</pre>
+<p>The chart exposes a ClusterIP service. Add your own Ingress or Gateway for external traffic. Its current values cover the address, workers, image, service, and resources; custom site files and TLS secrets need explicit volume mounts in your deployment.</p>
+<h2 id="check">Check your endpoint</h2>
+<pre>
+<code>curl -i http://localhost:8080/
 curl -I http://localhost:8080/
-curl -i http://localhost:8080/missing</code></pre><p>Expect 200 for the home page and 404 for a missing page. See <a href="configure.html">configuration</a> before changing the listen port, and <a href="security.html">TLS &amp; mTLS</a> before exposing HTTPS.</p></article><footer>Pixie documentation <span>Built from the source. Updated with the features.</span></footer></main><aside class="toc"><p>ON THIS PAGE</p><nav aria-label="On this page"><a href="#docker">Docker</a><a href="#cargo">Local Cargo build</a><a href="#linux">Debian / Ubuntu and Arch Linux</a><a href="#kubernetes">Kubernetes with Helm</a><a href="#check">Check your endpoint</a></nav></aside></div></body></html>
+curl -i http://localhost:8080/missing</code>
+</pre>
+<p>Expect 200 for the home page and 404 for a missing page. See <a href="configure.html">configuration</a> before changing the listen port, and <a href="security.html">TLS &amp; mTLS</a> before exposing HTTPS.</p>
+</article>
+<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
+</footer>
+</main>
+<aside class="toc">
+<p>ON THIS PAGE</p>
+<nav aria-label="On this page">
+<a href="#docker">Docker</a>
+<a href="#cargo">Local Cargo build</a>
+<a href="#linux">Debian / Ubuntu and Arch Linux</a>
+<a href="#kubernetes">Kubernetes with Helm</a>
+<a href="#check">Check your endpoint</a>
+</nav>
+</aside>
+</div>
+</body>
+</html>

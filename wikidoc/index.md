@@ -1,13 +1,9 @@
 # Pixie documentation
 
-Pixie is a small Rust server for static HTML pages. Use these pages to understand how it starts, loads configuration, and handles requests.
+The English documentation is now maintained as a static website in [`docs/`](https://github.com/laflut3/Pixie/tree/main/docs).
 
-## Application
+- [User guides: deploy, configure, and serve pages](https://github.com/laflut3/Pixie/blob/main/docs/deploy.html)
+- [Request flow and feature explanations](https://github.com/laflut3/Pixie/blob/main/docs/architecture.html)
+- [Preview and publish the documentation](https://github.com/laflut3/Pixie/blob/main/docs/publish.html)
 
-- [Architecture and request flow](code_fonctionnement.md)
-- [Configuration](configuration.md)
-- [Development](development.md)
-
-## Deployment
-
-See the [deployment guides](../infrastructure/README.md) for Docker, Kubernetes, APT, Debian packages, curl, and Arch Linux.
+The expected GitHub Pages URL is <https://laflut3.github.io/Pixie/docs/> after the release publisher succeeds.

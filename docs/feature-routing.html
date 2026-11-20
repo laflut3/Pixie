@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Web roots, route names, and how files become responses.">
+<meta name="theme-color" content="#f5f8ff">
+<title>From URL to HTML. — Pixie docs</title>
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/site.js" defer>
+</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+<a class="brand" href="index.html">
+<img src="assets/mark.svg" width="32" height="32" alt="">
+<span>pixie<span class="brand-sub"> / docs</span>
+</span>
+</a>
+<div class="top-actions">
+<span class="version">SOURCE GUIDE</span>
+<a href="https://github.com/laflut3/Pixie">GitHub ↗</a>
+<button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</div>
+</header>
+<div class="layout">
+<aside id="sidebar" class="sidebar">
+<nav aria-label="Documentation">
+<div class="nav-group">
+<p>Start here</p>
+<a href="index.html">Overview</a>
+</div>
+<div class="nav-group">
+<p>User guide</p>
+<a href="deploy.html">Deploy Pixie</a>
+<a href="configure.html">Configuration</a>
+<a href="serve.html">Serve a website</a>
+<a href="security.html">TLS &amp; mTLS</a>
+<a href="sites.html">Multiple sites</a>
+</div>
+<div class="nav-group">
+<p>How it works</p>
+<a aria-current="page" href="architecture.html">Request flow</a>
+<a href="feature-http.html">HTTP handling</a>
+<a aria-current="page" href="feature-routing.html">Routing &amp; files</a>
+<a href="feature-runtime.html">Runtime &amp; TLS</a>
+</div>
+<div class="nav-group">
+<p>Documentation</p>
+<a href="publish.html">Host the documentation</a>
+</div>
+</nav>
+<div class="sidebar-foot">
+<span class="status-dot">
+</span>Small Rust HTTP server</div>
+</aside>
+<main id="content" tabindex="-1">
+<div class="eyebrow">How it works</div>
+<h1>From URL to HTML.</h1>
+<p class="lead">Web roots, route names, and how files become responses.</p>
+<article>
+<h2 id="routing">Feature: static routing</h2>
+<p>
+<code>src/router.rs</code> chooses the web root and appends <code>.html</code> to a valid page name. The home page is <code>hello.html</code>. Query strings do not change the selected file. Paths with separators, encoded characters, or dot segments are rejected. Files are read as UTF-8 text on each request.</p>
+</article>
+<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
+</footer>
+</main>
+<aside class="toc">
+<p>ON THIS PAGE</p>
+<nav aria-label="On this page">
+<a href="#routing">Feature: static routing</a>
+</nav>
+</aside>
+</div>
+</body>
+</html>

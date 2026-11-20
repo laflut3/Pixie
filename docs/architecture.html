@@ -1,3 +1,116 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="A compact feature map of the current Rust implementation, from startup to response."><meta name="theme-color" content="#f5f8ff"><title>Follow the request. — Pixie docs</title><link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/style.css"><script src="assets/site.js" defer></script></head>
-<body><a class="skip" href="#content">Skip to content</a><header class="topbar"><a class="brand" href="index.html"><img src="assets/mark.svg" width="32" height="32" alt=""><span>pixie<span class="brand-sub"> / docs</span></span></a><div class="top-actions"><span class="version">SOURCE GUIDE</span><a href="https://github.com/laflut3/Pixie">GitHub ↗</a><button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button></div></header><div class="layout"><aside id="sidebar" class="sidebar"><nav aria-label="Documentation"><div class="nav-group"><p>Start here</p><a href="index.html">Small server. Clear docs</a></div><div class="nav-group"><p>User guide</p><a href="deploy.html">Choose your deployment</a><a href="configure.html">One file. A few options</a><a href="serve.html">Put your pages online</a><a href="security.html">HTTPS, with client trust</a><a href="sites.html">One domain. One site</a></div><div class="nav-group"><p>How it works</p><a aria-current="page" href="architecture.html">Follow the request</a></div><div class="nav-group"><p>Documentation</p><a href="publish.html">Static files. Ready to host</a></div></nav><div class="sidebar-foot"><span class="status-dot"></span>Small Rust HTTP server</div></aside><main id="content" tabindex="-1"><div class="eyebrow">How it works</div><h1>Follow the request.</h1><p class="lead">A compact feature map of the current Rust implementation, from startup to response.</p><article><h2 id="flow">The request path</h2><ol class="timeline"><li><strong>Configuration</strong><p>main.rs loads YAML and resolves the listen address, workers, and optional TLS files.</p></li><li><strong>Connection acceptance</strong><p>server.rs binds a TCP listener and sends accepted connections to the worker pool.</p></li><li><strong>TLS handshake</strong><p>With TLS configured, rustls validates credentials and optionally authenticates a client certificate before HTTP parsing.</p></li><li><strong>HTTP parsing</strong><p>The handler reads bounded headers, validates the HTTP version and Host, and accepts GET or HEAD.</p></li><li><strong>Route and file</strong><p>The router maps a simple page name to an HTML file under the selected web root.</p></li><li><strong>Response</strong><p>The handler writes a status, content type, content length, and body, then closes the connection. HEAD omits the body.</p></li></ol><h2 id="configuration">Feature: configuration</h2><p><code>src/config.rs</code> parses YAML with serde. Compiled defaults cover missing values. An explicit TLS section requires a certificate and key. Configuration is loaded once at startup. See the <a href="configure.html">complete option reference</a>.</p><h2 id="routing">Feature: static routing</h2><p><code>src/router.rs</code> chooses the web root and appends <code>.html</code> to a valid page name. The home page is <code>hello.html</code>. Query strings do not change the selected file. Paths with separators, encoded characters, or dot segments are rejected. Files are read as UTF-8 text on each request.</p><h2 id="http">Feature: HTTP/1.x</h2><p><code>src/server.rs</code> supports HTTP/1.0 and HTTP/1.1 requests. It requires Host for HTTP/1.1, limits request headers to 8 KiB, and sets five-second socket read/write timeouts. These are per-I/O timeouts, not a total request deadline. Connections close after one response.</p><div class="table-wrap"><table><thead><tr><th>Result</th><th>Status</th></tr></thead><tbody><tr><td>Page found</td><td>200</td></tr><tr><td>Page missing or rejected route</td><td>404</td></tr><tr><td>Invalid request or unsupported body</td><td>400</td></tr><tr><td>Unsupported method</td><td>405</td></tr><tr><td>Headers exceed the limit</td><td>431</td></tr><tr><td>File read failure</td><td>500</td></tr><tr><td>Unsupported HTTP version</td><td>505</td></tr></tbody></table></div><p>Keep-alive, caching validators, ranges, compression, uploads, HTTP/2, and HTTP/3 are not implemented here. HTTP/1.2 and HTTP/1.3 are not standardized versions.</p><h2 id="tls">Feature: TLS and mTLS</h2><p><code>src/tls.rs</code> loads the PEM chain and private key into a rustls server config. Without a client CA it authenticates the server only. With a client CA it uses WebPkiClientVerifier to require a trusted client certificate. Credentials are loaded once, and handshakes run within connection workers.</p><h2 id="concurrency">Feature: worker pool</h2><p><code>src/threadpool/</code> holds a fixed set of worker threads fed by a channel. Each connection occupies a worker while being handled. The job queue is unbounded, so worker count is a concurrency setting rather than a complete overload limit.</p><h2 id="logging">Feature: logging</h2><p><code>src/logger.rs</code> sends info, warning, and error messages to stderr. Startup logs show the address, worker count, TLS mode, and web root. There is no structured per-request access log or metrics endpoint yet.</p></article><footer>Pixie documentation <span>Built from the source. Updated with the features.</span></footer></main><aside class="toc"><p>ON THIS PAGE</p><nav aria-label="On this page"><a href="#flow">The request path</a><a href="#configuration">Feature: configuration</a><a href="#routing">Feature: static routing</a><a href="#http">Feature: HTTP/1.x</a><a href="#tls">Feature: TLS and mTLS</a><a href="#concurrency">Feature: worker pool</a><a href="#logging">Feature: logging</a></nav></aside></div></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A compact feature map of the current Rust implementation, from startup to response.">
+<meta name="theme-color" content="#f5f8ff">
+<title>Follow the request. — Pixie docs</title>
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/site.js" defer>
+</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+<a class="brand" href="index.html">
+<img src="assets/mark.svg" width="32" height="32" alt="">
+<span>pixie<span class="brand-sub"> / docs</span>
+</span>
+</a>
+<div class="top-actions">
+<span class="version">SOURCE GUIDE</span>
+<a href="https://github.com/laflut3/Pixie">GitHub ↗</a>
+<button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</div>
+</header>
+<div class="layout">
+<aside id="sidebar" class="sidebar">
+<nav aria-label="Documentation">
+<div class="nav-group">
+<p>Start here</p>
+<a href="index.html">Overview</a>
+</div>
+<div class="nav-group">
+<p>User guide</p>
+<a href="deploy.html">Deploy Pixie</a>
+<a href="configure.html">Configuration</a>
+<a href="serve.html">Serve a website</a>
+<a href="security.html">TLS &amp; mTLS</a>
+<a href="sites.html">Multiple sites</a>
+</div>
+<div class="nav-group">
+<p>How it works</p>
+<a aria-current="page" href="architecture.html">Request flow</a>
+<a href="feature-http.html">HTTP handling</a>
+<a href="feature-routing.html">Routing &amp; files</a>
+<a href="feature-runtime.html">Runtime &amp; TLS</a>
+</div>
+<div class="nav-group">
+<p>Documentation</p>
+<a href="publish.html">Host the documentation</a>
+</div>
+</nav>
+<div class="sidebar-foot">
+<span class="status-dot">
+</span>Small Rust HTTP server</div>
+</aside>
+<main id="content" tabindex="-1">
+<div class="eyebrow">How it works</div>
+<h1>Follow the request.</h1>
+<p class="lead">A compact feature map of the current Rust implementation, from startup to response.</p>
+<article>
+<h2 id="flow">The request path</h2>
+<ol class="timeline">
+<li>
+<strong>Configuration</strong>
+<p>main.rs loads YAML and resolves the listen address, workers, and optional TLS files.</p>
+</li>
+<li>
+<strong>Connection acceptance</strong>
+<p>server.rs binds a TCP listener and sends accepted connections to the worker pool.</p>
+</li>
+<li>
+<strong>TLS handshake</strong>
+<p>With TLS configured, rustls validates credentials and optionally authenticates a client certificate before HTTP parsing.</p>
+</li>
+<li>
+<strong>HTTP parsing</strong>
+<p>The handler reads bounded headers, validates the HTTP version and Host, and accepts GET or HEAD.</p>
+</li>
+<li>
+<strong>Route and file</strong>
+<p>The router maps a simple page name to an HTML file under the selected web root.</p>
+</li>
+<li>
+<strong>Response</strong>
+<p>The handler writes a status, content type, content length, and body, then closes the connection. HEAD omits the body.</p>
+</li>
+</ol>
+<h2 id="features">Explore each feature</h2>
+<ul>
+<li>
+<a href="feature-http.html">HTTP parsing and responses</a>
+</li>
+<li>
+<a href="feature-routing.html">Routing and file serving</a>
+</li>
+<li>
+<a href="feature-runtime.html">Configuration, TLS, workers, and logs</a>
+</li>
+</ul>
+</article>
+<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
+</footer>
+</main>
+<aside class="toc">
+<p>ON THIS PAGE</p>
+<nav aria-label="On this page">
+<a href="#flow">The request path</a>
+<a href="#features">Explore each feature</a>
+</nav>
+</aside>
+</div>
+</body>
+</html>

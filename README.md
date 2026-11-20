@@ -1,35 +1,50 @@
-# Pixie
+<div align="center">
+  <img src="docs/assets/mark.svg" width="64" height="64" alt="Pixie">
+  <h1>Pixie</h1>
+  <p><strong>Deploy your static HTML server.</strong></p>
+  <p>
+    <img alt="Rust" src="https://img.shields.io/badge/Rust-2024-d9471a?style=flat-square">
+    <img alt="Platforms" src="https://img.shields.io/badge/Linux-amd64%20%7C%20arm64-1764a8?style=flat-square">
+    <img alt="License" src="https://img.shields.io/badge/license-MIT-168279?style=flat-square">
+  </p>
+  <p><a href="docs/index.html"><strong>📖 Documentation</strong></a> · <a href="docs/publish.html">Host the docs</a></p>
+</div>
 
-Pixie is a lightweight static HTTP server written in Rust. It serves the HTML files in `web/`. The sample deployment configuration listens on `0.0.0.0:8080`.
-
-Pixie currently supports HTTP/1.0 and HTTP/1.1. HTTPS can be enabled with TLS certificates, with optional client-certificate verification (mTLS); see [TLS configuration](infrastructure/docs/tls.md). HTTP/2 and HTTP/3 are not implemented yet. HTTP/1.2 and HTTP/1.3 are not standardized protocol versions.
-
-## Install
-
-[Quick installation commands](infrastructure/docs/install.md)
-
-## Deployment guides
-
-- [Docker and Compose](infrastructure/docs/docker.md)
-- [Kubernetes with Helm](infrastructure/docs/kubernetes.md)
-- [APT repository](infrastructure/docs/apt.md)
-- [Install with curl](infrastructure/docs/curl.md)
-- [Build a Debian package](infrastructure/docs/debian-package.md)
-- [Arch Linux](infrastructure/docs/arch.md)
-
-## Development
+## 🚀 Docker
 
 ```sh
-PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked
+docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest
 ```
 
-HTTPS can be enabled with `tls.cert_file` and `tls.key_file` in the config file. Set `tls.client_ca_file` to require client certificates (mTLS). See [TLS configuration](infrastructure/docs/tls.md).
+Open **http://localhost:8080/**.
 
-## Project layout
+## 📦 Deployment options
 
-- `src/`: Rust library and binary
-- `tests/`: integration tests
-- `web/`: static pages served by Pixie
-- `infrastructure/`: deployment, packaging, and infrastructure documentation
+Run repository commands from a local checkout.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development checks.
+| Method | Start here | Guide |
+| :--- | :--- | :--- |
+| 🐳 **Docker Compose** | `docker compose -f infrastructure/docker/compose.yaml up -d` | [Containers](docs/deploy.html#docker) |
+| ☸ **Kubernetes / Helm** | `helm upgrade --install pixie infrastructure/helm/pixie --namespace pixie --create-namespace` | [Kubernetes](docs/deploy.html#kubernetes) |
+| 🐧 **Debian / Ubuntu** | Use the signed APT repository installer below. | [Linux packages](docs/deploy.html#linux) |
+| 📐 **Arch Linux** | `yay -S pixie-git` | [Linux packages](docs/deploy.html#linux) |
+| 🦀 **Cargo** | `PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked` | [Local build](docs/deploy.html#cargo) |
+| 🛠 **Local Debian package** | `infrastructure/scripts/build-deb.sh` | [Build and install](docs/deploy.html#linux) |
+
+### Debian / Ubuntu installer
+
+Download and review the installer, then run it:
+
+```sh
+curl -fsSLo install-pixie.sh https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/apt/install.sh
+less install-pixie.sh
+bash install-pixie.sh
+sudo systemctl enable --now pixie
+```
+
+### Build a container from source
+
+```sh
+docker build -f infrastructure/docker/Dockerfile -t pixie:local .
+docker run --rm -p 8080:8080 pixie:local
+```

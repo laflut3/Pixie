@@ -1,3 +1,122 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Deploy Pixie, serve your pages, and understand the code behind each request."><meta name="theme-color" content="#f5f8ff"><title>Small server. Clear docs. — Pixie docs</title><link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/style.css"><script src="assets/site.js" defer></script></head>
-<body><a class="skip" href="#content">Skip to content</a><header class="topbar"><a class="brand" href="index.html"><img src="assets/mark.svg" width="32" height="32" alt=""><span>pixie<span class="brand-sub"> / docs</span></span></a><div class="top-actions"><span class="version">SOURCE GUIDE</span><a href="https://github.com/laflut3/Pixie">GitHub ↗</a><button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button></div></header><div class="layout"><aside id="sidebar" class="sidebar"><nav aria-label="Documentation"><div class="nav-group"><p>Start here</p><a aria-current="page" href="index.html">Small server. Clear docs</a></div><div class="nav-group"><p>User guide</p><a href="deploy.html">Choose your deployment</a><a href="configure.html">One file. A few options</a><a href="serve.html">Put your pages online</a><a href="security.html">HTTPS, with client trust</a><a href="sites.html">One domain. One site</a></div><div class="nav-group"><p>How it works</p><a href="architecture.html">Follow the request</a></div><div class="nav-group"><p>Documentation</p><a href="publish.html">Static files. Ready to host</a></div></nav><div class="sidebar-foot"><span class="status-dot"></span>Small Rust HTTP server</div></aside><main id="content" tabindex="-1"><div class="eyebrow">Start here</div><h1>Small server. Clear docs.</h1><p class="lead">Deploy Pixie, serve your pages, and understand the code behind each request.</p><article><div class="hero-note"><span class="status-dot"></span>Current implementation · HTTP/1.0 + HTTP/1.1 · TLS + mTLS</div><div class="path-grid"><a class="path-card" href="deploy.html"><span class="step">01 / USE PIXIE</span><h2>From install to first page.</h2><p>Choose a deployment, configure a web root, and enable HTTPS.</p><span class="card-link">Open the user guide ↗</span></a><a class="path-card" href="architecture.html"><span class="step">02 / UNDER THE HOOD</span><h2>Follow a request.</h2><p>Learn how configuration, routing, TLS, and worker threads fit together.</p><span class="card-link">Explore the features ↗</span></a></div><h2 id="quick-start">A first request in one command</h2><pre><code>docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest</code></pre><p>Open <a href="http://localhost:8080/">http://localhost:8080/</a>. To serve your own pages, continue with <a href="serve.html">Serve a website</a>.</p><aside class="callout"><strong>Read the version you run.</strong><p>These pages describe this source branch. A published image or package may contain an earlier release. HTTP/2 and HTTP/3 are not implemented in this documented version.</p></aside><h2 id="choose">Find the right guide</h2><ul class="link-list"><li><a href="configure.html">Change the address, workers, or web root <span>Configuration →</span></a></li><li><a href="security.html">Use your certificate or require client certificates <span>TLS &amp; mTLS →</span></a></li><li><a href="sites.html">Host two sites behind domain names <span>Multiple sites →</span></a></li><li><a href="publish.html">Preview or publish this documentation <span>Documentation hosting →</span></a></li></ul></article><footer>Pixie documentation <span>Built from the source. Updated with the features.</span></footer></main><aside class="toc"><p>ON THIS PAGE</p><nav aria-label="On this page"><a href="#quick-start">A first request in one command</a><a href="#choose">Find the right guide</a></nav></aside></div></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Deploy Pixie, serve your pages, and understand the code behind each request.">
+<meta name="theme-color" content="#f5f8ff">
+<title>Small server. Clear docs. — Pixie docs</title>
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/site.js" defer>
+</script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+<a class="brand" href="index.html">
+<img src="assets/mark.svg" width="32" height="32" alt="">
+<span>pixie<span class="brand-sub"> / docs</span>
+</span>
+</a>
+<div class="top-actions">
+<span class="version">SOURCE GUIDE</span>
+<a href="https://github.com/laflut3/Pixie">GitHub ↗</a>
+<button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button>
+</div>
+</header>
+<div class="layout">
+<aside id="sidebar" class="sidebar">
+<nav aria-label="Documentation">
+<div class="nav-group">
+<p>Start here</p>
+<a aria-current="page" href="index.html">Overview</a>
+</div>
+<div class="nav-group">
+<p>User guide</p>
+<a href="deploy.html">Deploy Pixie</a>
+<a href="configure.html">Configuration</a>
+<a href="serve.html">Serve a website</a>
+<a href="security.html">TLS &amp; mTLS</a>
+<a href="sites.html">Multiple sites</a>
+</div>
+<div class="nav-group">
+<p>How it works</p>
+<a href="architecture.html">Request flow</a>
+<a href="feature-http.html">HTTP handling</a>
+<a href="feature-routing.html">Routing &amp; files</a>
+<a href="feature-runtime.html">Runtime &amp; TLS</a>
+</div>
+<div class="nav-group">
+<p>Documentation</p>
+<a href="publish.html">Host the documentation</a>
+</div>
+</nav>
+<div class="sidebar-foot">
+<span class="status-dot">
+</span>Small Rust HTTP server</div>
+</aside>
+<main id="content" tabindex="-1">
+<div class="eyebrow">Start here</div>
+<h1>Small server. Clear docs.</h1>
+<p class="lead">Deploy Pixie, serve your pages, and understand the code behind each request.</p>
+<article>
+<div class="hero-note">
+<span class="status-dot">
+</span>Current implementation · HTTP/1.0 + HTTP/1.1 · TLS + mTLS</div>
+<div class="path-grid">
+<a class="path-card" href="deploy.html">
+<span class="step">01 / USE PIXIE</span>
+<h2>From install to first page.</h2>
+<p>Choose a deployment, configure a web root, and enable HTTPS.</p>
+<span class="card-link">Open the user guide ↗</span>
+</a>
+<a class="path-card" href="architecture.html">
+<span class="step">02 / UNDER THE HOOD</span>
+<h2>Follow a request.</h2>
+<p>Learn how configuration, routing, TLS, and worker threads fit together.</p>
+<span class="card-link">Explore the features ↗</span>
+</a>
+</div>
+<h2 id="quick-start">A first request in one command</h2>
+<pre>
+<code>docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest</code>
+</pre>
+<p>Open <a href="http://localhost:8080/">http://localhost:8080/</a>. To serve your own pages, continue with <a href="serve.html">Serve a website</a>.</p>
+<aside class="callout">
+<strong>Read the version you run.</strong>
+<p>These pages describe this source branch. A published image or package may contain an earlier release. HTTP/2 and HTTP/3 are not implemented in this documented version.</p>
+</aside>
+<h2 id="choose">Find the right guide</h2>
+<ul class="link-list">
+<li>
+<a href="configure.html">Change the address, workers, or web root <span>Configuration →</span>
+</a>
+</li>
+<li>
+<a href="security.html">Use your certificate or require client certificates <span>TLS &amp; mTLS →</span>
+</a>
+</li>
+<li>
+<a href="sites.html">Host two sites behind domain names <span>Multiple sites →</span>
+</a>
+</li>
+<li>
+<a href="publish.html">Preview or publish this documentation <span>Documentation hosting →</span>
+</a>
+</li>
+</ul>
+</article>
+<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
+</footer>
+</main>
+<aside class="toc">
+<p>ON THIS PAGE</p>
+<nav aria-label="On this page">
+<a href="#quick-start">A first request in one command</a>
+<a href="#choose">Find the right guide</a>
+</nav>
+</aside>
+</div>
+</body>
+</html>
