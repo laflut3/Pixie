@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="A compact feature map of the current Rust implementation, from startup to response.">
-<meta name="theme-color" content="#f5f8ff">
+<meta name="theme-color" content="#f7f4eb">
 <title>Follow the request. — Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
@@ -65,7 +65,7 @@
 <ol class="timeline">
 <li>
 <strong>Configuration</strong>
-<p>main.rs loads YAML and resolves the listen address, workers, and optional TLS files.</p>
+<p><code>main.rs</code> loads the selected YAML, TOML, or JSON file, then resolves the listen address, worker count, and optional TLS files.</p>
 </li>
 <li>
 <strong>Connection acceptance</strong>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Enable server TLS, then optionally require a certificate from every client.">
-<meta name="theme-color" content="#f5f8ff">
+<meta name="theme-color" content="#f7f4eb">
 <title>HTTPS, with client trust. — Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
@@ -102,7 +102,7 @@ tls:
 <p>HTTP/3 uses QUIC over UDP and is experimental. Enable <code>http3.addr</code> in Pixie configuration. In Helm, set <code>tls.enabled=true</code>, <code>tls.secretName</code>, and <code>http3.enabled=true</code>; expose the selected UDP port in the firewall and any external load balancer. The current chart mounts the Secret as <code>/etc/pixie/tls</code>.</p>
 <h2 id="troubleshoot">When a connection fails</h2>
 <ul>
-<li>Startup error: check YAML, certificate chain, key match, file paths, and permissions.</li>
+<li>Startup error: check the config file syntax, certificate chain, key match, file paths, and permissions.</li>
 <li>Client trust error: check the server hostname and the trusted server CA.</li>
 <li>mTLS failure: check the client certificate, private key, expiry, and trusted client CA.</li>
 <li>Connection refused: check the configured port, container mapping, service, and firewall.</li>
