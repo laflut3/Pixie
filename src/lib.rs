@@ -10,9 +10,10 @@ pub mod logger;
 pub mod router;
 pub mod server;
 pub mod threadpool;
+pub mod tls;
 
-pub use crate::config::RuntimeConfig;
 pub use crate::config::runtime_config;
+pub use crate::config::{RuntimeConfig, TlsConfig};
 pub use crate::logger::log_error;
 pub use crate::logger::log_info;
 pub use crate::logger::log_warn;

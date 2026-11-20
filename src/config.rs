@@ -23,6 +23,17 @@ pub struct RuntimeConfig {
     pub addr: String,
     /// Number of worker threads.
     pub workers: usize,
+    /// TLS credentials and optional client-authentication CA.
+    pub tls: Option<TlsConfig>,
+}
+
+/// TLS files used by the HTTPS listener.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TlsConfig {
+    pub cert_file: String,
+    pub key_file: String,
+    /// When set, clients must present a certificate signed by this CA.
+    pub client_ca_file: Option<String>,
 }
 
 /// Partial YAML representation before normalization.
@@ -36,6 +47,15 @@ struct FileConfig {
     port: Option<u16>,
     #[serde(default, alias = "nb_worker")]
     workers: Option<usize>,
+    #[serde(default)]
+    tls: Option<FileTlsConfig>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
+struct FileTlsConfig {
+    cert_file: Option<String>,
+    key_file: Option<String>,
+    client_ca_file: Option<String>,
 }
 
 /// Builds the default address (`127.0.0.1:80`).
@@ -57,12 +77,35 @@ pub fn runtime_config() -> io::Result<RuntimeConfig> {
 
     let addr = file_addr(file_config.as_ref()).unwrap_or_else(default_addr);
 
-    let workers = match file_config.and_then(|cfg| cfg.workers) {
+    let workers = match file_config.as_ref().and_then(|cfg| cfg.workers) {
         Some(value) if value > 0 => value,
         _ => DEFAULT_THREADS,
     };
 
-    Ok(RuntimeConfig { addr, workers })
+    let tls = match file_config.as_ref().and_then(|cfg| cfg.tls.clone()) {
+        Some(tls) => {
+            let cert_file = tls.cert_file.filter(|s| !s.is_empty()).ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    "tls.cert_file is required when TLS is configured",
+                )
+            })?;
+            let key_file = tls.key_file.filter(|s| !s.is_empty()).ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    "tls.key_file is required when TLS is configured",
+                )
+            })?;
+            Some(TlsConfig {
+                cert_file,
+                key_file,
+                client_ca_file: tls.client_ca_file.filter(|s| !s.is_empty()),
+            })
+        }
+        None => None,
+    };
+
+    Ok(RuntimeConfig { addr, workers, tls })
 }
 
 /// Loads the first configuration file found in priority order.

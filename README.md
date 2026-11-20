@@ -21,6 +21,8 @@ Pixie is a lightweight static HTTP server written in Rust. It serves the HTML fi
 PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked
 ```
 
+HTTPS can be enabled with `tls.cert_file` and `tls.key_file` in the config file. Set `tls.client_ca_file` to require client certificates (mTLS). See [TLS configuration](infrastructure/docs/tls.md).
+
 ## Project layout
 
 - `src/`: Rust library and binary
