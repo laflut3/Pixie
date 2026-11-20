@@ -107,7 +107,7 @@ sudo systemctl enable --now pixie</code>
   --namespace pixie --create-namespace
 kubectl -n pixie port-forward service/pixie-pixie 8080:8080</code>
 </pre>
-<p>The chart exposes a ClusterIP service. Add your own Ingress or Gateway for external traffic. Its current values cover the address, workers, image, service, and resources; custom site files and TLS secrets need explicit volume mounts in your deployment.</p>
+<p>The chart exposes a ClusterIP service. Add your own Ingress or Gateway for external traffic. Its values cover the address, workers, image, service, and resources. Set <code>tls.enabled=true</code> and <code>tls.secretName</code> to mount a Kubernetes TLS Secret. HTTP/3 also requires TLS and <code>http3.enabled=true</code>, which exposes the configured UDP port.</p>
 <h2 id="check">Check your endpoint</h2>
 <pre>
 <code>curl -i http://localhost:8080/

@@ -98,6 +98,8 @@ tls:
   ghcr.io/laflut3/pixie:latest</code>
 </pre>
 <p>The container runs as <code>pixie</code>; file permissions must allow that account to read the mounted credentials. For Kubernetes, mount a Secret and use a deployment configuration that points to its files. If TLS terminates at an Ingress instead, the connection from it to Pixie remains plain HTTP unless configured separately.</p>
+<h2 id="http3">Experimental HTTP/3</h2>
+<p>HTTP/3 uses QUIC over UDP and is experimental. Enable <code>http3.addr</code> in Pixie configuration. In Helm, set <code>tls.enabled=true</code>, <code>tls.secretName</code>, and <code>http3.enabled=true</code>; expose the selected UDP port in the firewall and any external load balancer. The current chart mounts the Secret as <code>/etc/pixie/tls</code>.</p>
 <h2 id="troubleshoot">When a connection fails</h2>
 <ul>
 <li>Startup error: check YAML, certificate chain, key match, file paths, and permissions.</li>
@@ -115,6 +117,7 @@ tls:
 <a href="#tls">Enable HTTPS</a>
 <a href="#mtls">Require client certificates</a>
 <a href="#mounts">Container and Kubernetes setup</a>
+<a href="#http3">Experimental HTTP/3</a>
 <a href="#troubleshoot">When a connection fails</a>
 </nav>
 </aside>

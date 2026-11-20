@@ -1,3 +1,6 @@
+{{- if and .Values.http3.enabled (not .Values.tls.enabled) }}
+{{- fail "http3.enabled requires tls.enabled" }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,6 +9,14 @@ data:
   config-pixie.yml: |
     addr: {{ .Values.config.addr | quote }}
     workers: {{ .Values.config.workers }}
+    {{- if .Values.tls.enabled }}
+    tls:
+      cert_file: {{ .Values.tls.certFile | quote }}
+      key_file: {{ .Values.tls.keyFile | quote }}
+      {{- if .Values.tls.clientCaFile }}
+      client_ca_file: {{ .Values.tls.clientCaFile | quote }}
+      {{- end }}
+    {{- end }}
     {{- if .Values.http3.enabled }}
     http3:
       addr: {{ .Values.http3.addr | quote }}
