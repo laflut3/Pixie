@@ -9,6 +9,8 @@ if [ -e "$OUTPUT_DIR" ] && [ -n "$(find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -p
   echo "Output directory must be empty: $OUTPUT_DIR" >&2
   exit 1
 fi
+mkdir -p "$OUTPUT_DIR"
+OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd)"
 mkdir -p "$OUTPUT_DIR/pool/main/p/pixie" "$OUTPUT_DIR/dists/stable/main"
 if ! compgen -G "$PACKAGES_DIR/*.deb" >/dev/null; then
   echo "No Debian packages found in $PACKAGES_DIR" >&2
