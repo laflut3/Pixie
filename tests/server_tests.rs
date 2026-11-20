@@ -48,7 +48,7 @@ fn run_server_remonte_une_erreur_si_l_adresse_est_invalide() {
     assert!(!err.to_string().is_empty());
 }
 
-/// Verifies that the server handles the internal error when `404.html` is missing.
+/// Verifies a valid HTTP 404 response when `404.html` is missing.
 #[test]
 fn serveur_journalise_une_erreur_si_404_est_absent() {
     let _lock = env_lock();
@@ -75,5 +75,6 @@ fn serveur_journalise_une_erreur_si_404_est_absent() {
         send_http_request(&addr, "GET /inconnue HTTP/1.1\r\nHost: localhost\r\n\r\n")
             .expect("request failed");
 
-    assert!(response_404.is_empty());
+    assert!(response_404.starts_with("HTTP/1.1 404 NOT FOUND"));
+    assert!(response_404.contains("Not Found"));
 }

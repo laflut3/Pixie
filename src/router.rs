@@ -85,10 +85,24 @@ fn extract_route(request_line: &str) -> Option<&str> {
     let method = parts.next()?;
     let target = parts.next()?;
 
-    if method != "GET" || !target.starts_with('/') {
+    if method != "GET" && method != "HEAD" || !target.starts_with('/') {
         return None;
     }
 
     let path = target.split_once('?').map_or(target, |(path, _)| path);
-    Some(path.trim_start_matches('/'))
+    let route = path.strip_prefix('/')?;
+    // Routes are a single HTML page name. Reject encoded separators, dot segments,
+    // backslashes, and other characters before constructing a filesystem path.
+    if route.contains('/')
+        || route.contains('\\')
+        || route.contains('%')
+        || route == "."
+        || route == ".."
+        || !route
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+    {
+        return None;
+    }
+    Some(route)
 }
