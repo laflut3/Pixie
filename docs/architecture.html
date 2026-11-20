@@ -69,7 +69,7 @@
 </li>
 <li>
 <strong>Connection acceptance</strong>
-<p>server.rs binds a TCP listener and sends accepted connections to the worker pool.</p>
+<p>server.rs runs a Tokio runtime, accepts TCP connections, and spawns an asynchronous Hyper connection task for each one.</p>
 </li>
 <li>
 <strong>TLS handshake</strong>
@@ -77,7 +77,7 @@
 </li>
 <li>
 <strong>HTTP parsing</strong>
-<p>The handler reads bounded headers, validates the HTTP version and Host, and accepts GET or HEAD.</p>
+<p>Hyper parses HTTP/1.x or HTTP/2 messages. Pixie's handler accepts GET or HEAD and passes the URL path to the router.</p>
 </li>
 <li>
 <strong>Route and file</strong>
@@ -85,7 +85,7 @@
 </li>
 <li>
 <strong>Response</strong>
-<p>The handler writes a status, content type, content length, and body, then closes the connection. HEAD omits the body.</p>
+<p>Hyper writes the status, content type, content length, and body. HTTP/1 connections close after the response; HTTP/2 follows stream semantics. HEAD omits the body.</p>
 </li>
 </ol>
 <h2 id="features">Explore each feature</h2>

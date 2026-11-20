@@ -66,10 +66,10 @@
 <code>src/config.rs</code> parses YAML with serde. Compiled defaults cover missing values. An explicit TLS section requires a certificate and key. Configuration is loaded once at startup. See the <a href="configure.html">complete option reference</a>.</p>
 <h2 id="tls">Feature: TLS and mTLS</h2>
 <p>
-<code>src/tls.rs</code> loads the PEM chain and private key into a rustls server config. Without a client CA it authenticates the server only. With a client CA it uses WebPkiClientVerifier to require a trusted client certificate. Credentials are loaded once, and handshakes run within connection workers.</p>
+<code>src/tls.rs</code> loads the PEM chain and private key into a rustls server config. Without a client CA it authenticates the server only. With a client CA it uses WebPkiClientVerifier to require a trusted client certificate. Credentials are loaded once, and async TLS handshakes run per connection. ALPN negotiates HTTP/2 or HTTP/1.1.</p>
 <h2 id="concurrency">Feature: worker pool</h2>
 <p>
-<code>src/threadpool/</code> holds a fixed set of worker threads fed by a channel. Each connection occupies a worker while being handled. The job queue is unbounded, so worker count is a concurrency setting rather than a complete overload limit.</p>
+<code>src/server.rs</code> creates a Tokio multi-thread runtime using the configured worker count. Connections are asynchronous tasks; they do not reserve one runtime thread while waiting for network I/O. There is no explicit connection admission limit.</p>
 <h2 id="logging">Feature: logging</h2>
 <p>
 <code>src/logger.rs</code> sends info, warning, and error messages to stderr. Startup logs show the address, worker count, TLS mode, and web root. There is no structured per-request access log or metrics endpoint yet.</p>
