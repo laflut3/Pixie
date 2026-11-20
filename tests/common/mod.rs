@@ -3,7 +3,7 @@
 use std::{
     env, fs,
     io::{self, Read, Write},
-    net::{Shutdown, TcpListener, TcpStream},
+    net::{TcpListener, TcpStream},
     path::PathBuf,
     sync::Mutex,
     thread,
@@ -146,8 +146,6 @@ pub fn wait_for_server(addr: &str, timeout: Duration) {
 pub fn send_http_request(addr: &str, request: &str) -> io::Result<String> {
     let mut stream = TcpStream::connect(addr)?;
     stream.write_all(request.as_bytes())?;
-    stream.shutdown(Shutdown::Write)?;
-
     let mut buf = Vec::new();
     stream.read_to_end(&mut buf)?;
     String::from_utf8(buf)

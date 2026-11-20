@@ -37,7 +37,7 @@ fn serveur_repond_200_et_404() {
     let response_404 =
         send_http_request(&addr, "GET /inconnue HTTP/1.1\r\nHost: localhost\r\n\r\n")
             .expect("HTTP 404 request failed");
-    assert!(response_404.starts_with("HTTP/1.1 404 NOT FOUND"));
+    assert!(response_404.starts_with("HTTP/1.1 404 Not Found"));
     assert!(response_404.contains("Page absente"));
 }
 
@@ -75,6 +75,6 @@ fn serveur_journalise_une_erreur_si_404_est_absent() {
         send_http_request(&addr, "GET /inconnue HTTP/1.1\r\nHost: localhost\r\n\r\n")
             .expect("request failed");
 
-    assert!(response_404.starts_with("HTTP/1.1 404 NOT FOUND"));
+    assert!(response_404.starts_with("HTTP/1.1 404 Not Found"));
     assert!(response_404.contains("Not Found"));
 }

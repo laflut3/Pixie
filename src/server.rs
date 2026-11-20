@@ -1,230 +1,179 @@
-//! Pixie HTTP/1.x static server.
+//! Pixie static HTTP/1.x and HTTP/2 server.
 
-use std::{
-    fs,
-    io::{self, BufRead, BufReader, Read, Write},
-    net::{TcpListener, TcpStream},
-    path::Path,
-    sync::Arc,
-    time::Duration,
+use std::{fs, io, net::SocketAddr, path::PathBuf, sync::Arc, time::Duration};
+
+use bytes::Bytes;
+use http_body_util::Full;
+use hyper::{Request, Response, StatusCode, body::Incoming, service::service_fn};
+use hyper_util::{
+    rt::{TokioExecutor, TokioIo},
+    server::conn::auto::Builder,
+};
+use tokio::{
+    io::{AsyncRead, AsyncWrite},
+    net::TcpListener,
+    time::timeout,
 };
 
 use crate::{
-    ThreadPool, TlsConfig,
+    TlsConfig,
     logger::{log_error, log_info},
     router::{resolve_route, resolve_web_root},
-    tls::{accept_tls, load_server_config},
+    tls::load_server_config,
 };
-
-const MAX_REQUEST_BYTES: usize = 8 * 1024;
-const IO_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
     run_server_with_tls(addr, pool_size, None)
 }
 
-/// Starts the server with optional TLS credentials.
+/// Starts a Tokio based HTTP/1.x and HTTP/2 server with optional TLS/mTLS.
 pub fn run_server_with_tls(addr: &str, pool_size: usize, tls: Option<TlsConfig>) -> io::Result<()> {
-    let listener = TcpListener::bind(addr)?;
-    let pool = ThreadPool::new(pool_size);
-    let web_root = Arc::new(resolve_web_root());
-    let tls = tls.as_ref().map(load_server_config).transpose()?;
-    log_info(format_args!(
-        "listening on {addr} with {pool_size} workers, tls={} (web_root={})",
-        tls.is_some(),
-        web_root.display()
-    ));
-
-    for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => {
-                let root = Arc::clone(&web_root);
-                let tls = tls.clone();
-                pool.execute(move || {
-                    if let Err(err) = handle_connection(stream, root.as_path(), tls) {
-                        log_error(format_args!("failed to handle connection: {err}"));
-                    }
-                });
-            }
-            Err(err) => log_error(format_args!("failed to accept connection: {err}")),
-        }
+    let addr = addr.to_owned();
+    let mut tls_config = tls.as_ref().map(load_server_config).transpose()?;
+    if let Some(config) = &mut tls_config {
+        Arc::get_mut(config)
+            .expect("new TLS config is uniquely owned")
+            .alpn_protocols = vec![b"h2".to_vec(), b"http/1.1".to_vec()];
     }
-    Ok(())
+    let web_root = resolve_web_root();
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(pool_size.max(1))
+        .enable_all()
+        .build()
+        .map_err(io::Error::other)?;
+    runtime.block_on(async move {
+        let listener = TcpListener::bind(&addr).await?;
+        log_info(format_args!(
+            "listening on {addr} with {pool_size} workers, http/1 + http/2, tls={} (web_root={})",
+            tls_config.is_some(),
+            web_root.display()
+        ));
+        loop {
+            let (stream, peer) = listener.accept().await?;
+            let root = web_root.clone();
+            let tls = tls_config.clone();
+            tokio::spawn(async move {
+                if let Err(err) = serve_connection(stream, peer, root, tls).await {
+                    log_error(format_args!("failed to handle connection: {err}"));
+                }
+            });
+        }
+    })
 }
 
-enum ClientStream {
-    Plain(TcpStream),
-    Tls(rustls::StreamOwned<rustls::ServerConnection, TcpStream>),
-}
-
-impl Read for ClientStream {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        match self {
-            Self::Plain(s) => s.read(buf),
-            Self::Tls(s) => s.read(buf),
-        }
-    }
-}
-impl Write for ClientStream {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        match self {
-            Self::Plain(s) => s.write(buf),
-            Self::Tls(s) => s.write(buf),
-        }
-    }
-    fn flush(&mut self) -> io::Result<()> {
-        match self {
-            Self::Plain(s) => s.flush(),
-            Self::Tls(s) => s.flush(),
-        }
-    }
-}
-
-fn handle_connection(
-    stream: TcpStream,
-    web_root: &Path,
+async fn serve_connection(
+    stream: tokio::net::TcpStream,
+    _peer: SocketAddr,
+    root: PathBuf,
     tls: Option<Arc<rustls::ServerConfig>>,
 ) -> io::Result<()> {
-    stream.set_read_timeout(Some(IO_TIMEOUT))?;
-    stream.set_write_timeout(Some(IO_TIMEOUT))?;
-    let mut stream = if let Some(config) = tls {
-        ClientStream::Tls(accept_tls(stream, config)?)
+    stream.set_nodelay(true)?;
+    let io: TokioIo<Box<dyn AsyncIo>> = if let Some(config) = tls {
+        let acceptor = tokio_rustls::TlsAcceptor::from(config);
+        let tls_stream = timeout(Duration::from_secs(5), acceptor.accept(stream))
+            .await
+            .map_err(|_| io::Error::new(io::ErrorKind::TimedOut, "TLS handshake timed out"))??;
+        TokioIo::new(Box::new(tls_stream))
     } else {
-        ClientStream::Plain(stream)
+        TokioIo::new(Box::new(stream))
     };
-    let mut reader = BufReader::new(&mut stream);
-    let mut request = Vec::new();
-    loop {
-        if request.len() >= MAX_REQUEST_BYTES {
-            return write_response(
-                &mut stream,
-                "HTTP/1.1 431 Request Header Fields Too Large",
-                "Request too large",
-                false,
-            );
-        }
-        let mut line = Vec::new();
-        let n = (&mut reader)
-            .take((MAX_REQUEST_BYTES - request.len() + 1) as u64)
-            .read_until(b'\n', &mut line)?;
-        if n == 0 {
-            return Ok(());
-        }
-        request.extend_from_slice(&line);
-        if request.ends_with(b"\r\n\r\n") || request.ends_with(b"\n\n") {
-            break;
-        }
-    }
-    drop(reader);
-    if request.len() > MAX_REQUEST_BYTES {
-        return write_response(
-            &mut stream,
-            "HTTP/1.1 431 Request Header Fields Too Large",
-            "Request too large",
-            false,
-        );
-    }
-    let Ok(raw) = std::str::from_utf8(&request) else {
-        return write_response(
-            &mut stream,
-            "HTTP/1.1 400 Bad Request",
-            "Bad request",
-            false,
-        );
-    };
-    let mut lines = raw.split("\r\n");
-    let Some(start) = lines.next() else {
-        return bad_request(&mut stream);
-    };
-    let mut parts = start.split_ascii_whitespace();
-    let (Some(method), Some(target), Some(version)) = (parts.next(), parts.next(), parts.next())
-    else {
-        return bad_request(&mut stream);
-    };
-    if parts.next().is_some() || !target.starts_with('/') {
-        return bad_request(&mut stream);
-    }
-    let http10 = version == "HTTP/1.0";
-    if !http10 && version != "HTTP/1.1" {
-        return write_response(
-            &mut stream,
-            "HTTP/1.1 505 HTTP Version Not Supported",
-            "Version not supported",
-            false,
-        );
-    }
-    let headers = lines.filter(|l| !l.is_empty()).collect::<Vec<_>>();
-    if headers
-        .iter()
-        .any(|h| h.starts_with(' ') || h.starts_with('\t') || !h.contains(':'))
-    {
-        return bad_request(&mut stream);
-    }
-    if !http10
-        && !headers.iter().any(|h| {
-            h.split_once(':')
-                .is_some_and(|(k, v)| k.eq_ignore_ascii_case("host") && !v.trim().is_empty())
-        })
-    {
-        return bad_request(&mut stream);
-    }
-    if headers.iter().any(|h| {
-        h.split_once(':').is_some_and(|(k, v)| {
-            k.eq_ignore_ascii_case("transfer-encoding")
-                || (k.eq_ignore_ascii_case("content-length") && v.trim() != "0")
-        })
-    }) {
-        return write_response(
-            &mut stream,
-            "HTTP/1.1 400 Bad Request",
-            "Request body not supported",
-            false,
-        );
-    }
-    if method != "GET" && method != "HEAD" {
-        return write_response(
-            &mut stream,
-            "HTTP/1.1 405 Method Not Allowed",
+    let mut builder = Builder::new(TokioExecutor::new());
+    builder.http1().keep_alive(false);
+    builder
+        .serve_connection(io, service_fn(move |req| respond(req, root.clone())))
+        .await
+        .map_err(io::Error::other)
+}
+
+trait AsyncIo: AsyncRead + AsyncWrite + Unpin + Send {}
+impl<T: AsyncRead + AsyncWrite + Unpin + Send> AsyncIo for T {}
+
+async fn respond(
+    req: Request<Incoming>,
+    root: PathBuf,
+) -> Result<Response<Full<Bytes>>, io::Error> {
+    let method = req.method().clone();
+    let http_version = req.version();
+    if method != hyper::Method::GET && method != hyper::Method::HEAD {
+        let mut response = response(
+            StatusCode::METHOD_NOT_ALLOWED,
             "Method not allowed",
-            false,
+            method == hyper::Method::HEAD,
         );
+        close_http1(&mut response, http_version);
+        return Ok(response);
     }
+    let target = req.uri().path();
     let request_line = format!("GET {target} HTTP/1.1");
-    let (status, filename) = resolve_route(&request_line, web_root);
-    let body = match fs::read_to_string(&filename) {
-        Ok(body) => body,
-        Err(_err) if status.contains("404") => {
-            return write_response(
-                &mut stream,
-                "HTTP/1.1 404 NOT FOUND",
+    let (status, file) = resolve_route(&request_line, &root);
+    let body = match fs::read(&file) {
+        Ok(bytes) => bytes,
+        Err(_) if status.contains("404") => {
+            return Ok(response(
+                StatusCode::NOT_FOUND,
                 "Not Found",
-                method == "HEAD",
-            );
+                method == hyper::Method::HEAD,
+            ));
         }
         Err(_) => {
-            return write_response(
-                &mut stream,
-                "HTTP/1.1 500 Internal Server Error",
+            return Ok(response(
+                StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal Server Error",
-                method == "HEAD",
-            );
+                method == hyper::Method::HEAD,
+            ));
         }
     };
-    write_response(&mut stream, status, &body, method == "HEAD")
+    let status = if status.contains("200") {
+        StatusCode::OK
+    } else {
+        StatusCode::NOT_FOUND
+    };
+    let length = body.len();
+    let mut response = Response::new(Full::new(if method == hyper::Method::HEAD {
+        Bytes::new()
+    } else {
+        Bytes::from(body)
+    }));
+    *response.status_mut() = status;
+    response.headers_mut().insert(
+        hyper::header::CONTENT_TYPE,
+        "text/html; charset=utf-8".parse().unwrap(),
+    );
+    response.headers_mut().insert(
+        hyper::header::CONTENT_LENGTH,
+        length.to_string().parse().unwrap(),
+    );
+    close_http1(&mut response, http_version);
+    Ok(response)
 }
 
-fn bad_request(stream: &mut impl Write) -> io::Result<()> {
-    write_response(stream, "HTTP/1.1 400 Bad Request", "Bad request", false)
-}
-
-fn write_response(stream: &mut impl Write, status: &str, body: &str, head: bool) -> io::Result<()> {
-    write!(
-        stream,
-        "{status}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-        body.len()
-    )?;
-    if !head {
-        stream.write_all(body.as_bytes())?;
+fn close_http1(response: &mut Response<Full<Bytes>>, version: hyper::Version) {
+    if version != hyper::Version::HTTP_2 {
+        response
+            .headers_mut()
+            .insert(hyper::header::CONNECTION, "close".parse().unwrap());
     }
-    Ok(())
+}
+
+fn response(status: StatusCode, body: &'static str, head: bool) -> Response<Full<Bytes>> {
+    let mut response = Response::new(Full::new(if head {
+        Bytes::new()
+    } else {
+        Bytes::from_static(body.as_bytes())
+    }));
+    *response.status_mut() = status;
+    response.headers_mut().insert(
+        hyper::header::CONTENT_TYPE,
+        "text/plain; charset=utf-8".parse().unwrap(),
+    );
+    response.headers_mut().insert(
+        hyper::header::CONTENT_LENGTH,
+        body.len().to_string().parse().unwrap(),
+    );
+    if status == StatusCode::METHOD_NOT_ALLOWED {
+        response
+            .headers_mut()
+            .insert(hyper::header::ALLOW, "GET, HEAD".parse().unwrap());
+    }
+    response
 }
