@@ -6,8 +6,11 @@ ARCH="$(dpkg --print-architecture)"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 PKG="$WORK/pixie"
-(cd "$ROOT" && cargo build --release --locked)
-install -Dm755 "$ROOT/target/release/pixie" "$PKG/usr/bin/pixie"
+BINARY="${1:-$ROOT/target/release/pixie}"
+if [ "$#" -eq 0 ]; then
+  (cd "$ROOT" && cargo build --release --locked)
+fi
+install -Dm755 "$BINARY" "$PKG/usr/bin/pixie"
 install -Dm644 "$ROOT/infrastructure/config/config-pixie.yml" "$PKG/etc/pixie/config-pixie.yml"
 install -Dm644 "$ROOT/infrastructure/debian/pixie.service" "$PKG/lib/systemd/system/pixie.service"
 install -Dm644 "$ROOT/infrastructure/debian/pixie.1" "$PKG/usr/share/man/man1/pixie.1"
