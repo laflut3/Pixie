@@ -1,9 +1,11 @@
-name: Build app
+name: Publish container image
 
 on:
   push:
     branches:
       - main
+    tags:
+      - "v*.*.*"
 
 permissions:
   contents: read
@@ -19,6 +21,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Select image tags
+        id: image
+        shell: bash
+        run: |
+          image=ghcr.io/laflut3/pixie
+          tags="${image}:${GITHUB_SHA}"
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            [[ "$GITHUB_REF_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo "Expected a stable SemVer tag: vX.Y.Z" >&2; exit 1; }
+            version="${GITHUB_REF_NAME#v}"
+            cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
+            test "$version" = "$cargo_version" || { echo "Tag and Cargo version differ" >&2; exit 1; }
+            tags="${tags},${image}:${GITHUB_REF_NAME},${image}:${version}"
+          else
+            tags="${tags},${image}:latest"
+          fi
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
@@ -40,8 +59,9 @@ jobs:
           file: infrastructure/docker/Dockerfile
           push: true
           platforms: linux/amd64, linux/arm64
-          tags: |
-            ghcr.io/laflut3/pixie:${{ github.sha }}
-            ghcr.io/laflut3/pixie:latest
+          tags: ${{ steps.image.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
