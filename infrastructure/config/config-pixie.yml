@@ -1,3 +1,6 @@
 # Default Pixie configuration
 addr: 0.0.0.0:8080
 workers: 4
+# Optional experimental HTTP/3 listener (requires TLS credentials below).
+# http3:
+#   addr: 0.0.0.0:8443

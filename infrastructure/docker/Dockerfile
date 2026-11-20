@@ -24,6 +24,7 @@ ENV PIXIE_CONFIG=/etc/pixie/config-pixie.yml
 ENV PIXIE_WEB_ROOT=/usr/share/pixie/web
 
 EXPOSE 8080
+EXPOSE 8443/udp
 
 USER pixie
 

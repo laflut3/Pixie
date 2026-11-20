@@ -6,3 +6,7 @@ data:
   config-pixie.yml: |
     addr: {{ .Values.config.addr | quote }}
     workers: {{ .Values.config.workers }}
+    {{- if .Values.http3.enabled }}
+    http3:
+      addr: {{ .Values.http3.addr | quote }}
+    {{- end }}

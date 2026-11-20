@@ -25,6 +25,7 @@ pub struct RuntimeConfig {
     pub workers: usize,
     /// TLS credentials and optional client-authentication CA.
     pub tls: Option<TlsConfig>,
+    pub http3: Option<String>,
 }
 
 /// TLS files used by the HTTPS listener.
@@ -49,6 +50,12 @@ struct FileConfig {
     workers: Option<usize>,
     #[serde(default)]
     tls: Option<FileTlsConfig>,
+    http3: Option<FileHttp3Config>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
+struct FileHttp3Config {
+    addr: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
@@ -105,7 +112,22 @@ pub fn runtime_config() -> io::Result<RuntimeConfig> {
         None => None,
     };
 
-    Ok(RuntimeConfig { addr, workers, tls })
+    let http3 = file_config
+        .as_ref()
+        .and_then(|cfg| cfg.http3.as_ref())
+        .and_then(|cfg| cfg.addr.clone());
+    if http3.is_some() && tls.is_none() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "http3 requires TLS configuration",
+        ));
+    }
+    Ok(RuntimeConfig {
+        addr,
+        workers,
+        tls,
+        http3,
+    })
 }
 
 /// Loads the first configuration file found in priority order.

@@ -9,4 +9,8 @@ service:
 config:
   addr: 0.0.0.0:8080
   workers: 4
+http3:
+  enabled: false
+  addr: 0.0.0.0:8443
+  port: 8443
 resources: {}

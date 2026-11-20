@@ -28,6 +28,15 @@ pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
 
 /// Starts a Tokio based HTTP/1.x and HTTP/2 server with optional TLS/mTLS.
 pub fn run_server_with_tls(addr: &str, pool_size: usize, tls: Option<TlsConfig>) -> io::Result<()> {
+    run_server_with_protocols(addr, pool_size, tls, None)
+}
+
+pub fn run_server_with_protocols(
+    addr: &str,
+    pool_size: usize,
+    tls: Option<TlsConfig>,
+    http3_addr: Option<String>,
+) -> io::Result<()> {
     let addr = addr.to_owned();
     let mut tls_config = tls.as_ref().map(load_server_config).transpose()?;
     if let Some(config) = &mut tls_config {
@@ -42,6 +51,62 @@ pub fn run_server_with_tls(addr: &str, pool_size: usize, tls: Option<TlsConfig>)
         .build()
         .map_err(io::Error::other)?;
     runtime.block_on(async move {
+        if let Some(http3_addr) = http3_addr {
+            let mut h3_tls = (**tls_config.as_ref().ok_or_else(|| {
+                io::Error::new(io::ErrorKind::InvalidInput, "HTTP/3 requires TLS")
+            })?)
+            .clone();
+            h3_tls.alpn_protocols = vec![b"h3".to_vec()];
+            let crypto = quinn::crypto::rustls::QuicServerConfig::try_from(h3_tls)
+                .map_err(io::Error::other)?;
+            let endpoint = quinn::Endpoint::server(
+                quinn::ServerConfig::with_crypto(Arc::new(crypto)),
+                http3_addr.parse().map_err(io::Error::other)?,
+            )?;
+            let root = web_root.clone();
+            tokio::spawn(async move {
+                log_info(format_args!(
+                    "HTTP/3 listening on {http3_addr} (experimental)"
+                ));
+                while let Some(connecting) = endpoint.accept().await {
+                    let root = root.clone();
+                    tokio::spawn(async move {
+                        if let Ok(connection) = connecting.await {
+                            let mut h3 = match h3::server::builder()
+                                .build(h3_quinn::Connection::new(connection))
+                                .await
+                            {
+                                Ok(h3) => h3,
+                                Err(_) => return,
+                            };
+                            while let Ok(Some(resolver)) = h3.accept().await {
+                                let root = root.clone();
+                                tokio::spawn(async move {
+                                    if let Ok((request, mut stream)) =
+                                        resolver.resolve_request().await
+                                    {
+                                        let (status, body) = h3_response(
+                                            request.method().as_str(),
+                                            request.uri().path(),
+                                            &root,
+                                        );
+                                        let response = hyper::Response::builder()
+                                            .status(status)
+                                            .header("content-type", "text/html; charset=utf-8")
+                                            .body(())
+                                            .unwrap();
+                                        if stream.send_response(response).await.is_ok() {
+                                            let _ = stream.send_data(Bytes::from(body)).await;
+                                            let _ = stream.finish().await;
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        }
         let listener = TcpListener::bind(&addr).await?;
         log_info(format_args!(
             "listening on {addr} with {pool_size} workers, http/1 + http/2, tls={} (web_root={})",
@@ -59,6 +124,20 @@ pub fn run_server_with_tls(addr: &str, pool_size: usize, tls: Option<TlsConfig>)
             });
         }
     })
+}
+
+fn h3_response(method: &str, path: &str, root: &std::path::Path) -> (u16, Vec<u8>) {
+    if method != "GET" && method != "HEAD" {
+        return (405, b"Method not allowed".to_vec());
+    }
+    let (status, file) = resolve_route(&format!("GET {path} HTTP/1.1"), root);
+    match fs::read(file) {
+        Ok(bytes) if status.contains("200") => {
+            (200, if method == "HEAD" { Vec::new() } else { bytes })
+        }
+        Ok(_) => (404, b"Not Found".to_vec()),
+        Err(_) => (404, b"Not Found".to_vec()),
+    }
 }
 
 async fn serve_connection(

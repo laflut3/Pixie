@@ -3,6 +3,7 @@ services:
     image: ghcr.io/laflut3/pixie:latest
     ports:
       - "8080:8080"
+      - "8443:8443/udp"
     volumes:
       - ../config/config-pixie.yml:/etc/pixie/config-pixie.yml:ro
     restart: unless-stopped
