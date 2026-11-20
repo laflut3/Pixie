@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Deploy Pixie, serve your pages, and understand the code behind each request.">
+<meta name="description" content="Deploy Pixie, configure a site, or learn how requests work.">
 <meta name="theme-color" content="#f7f4eb">
-<title>Small server. Clear docs. — Pixie docs</title>
+<title>Pixie documentation</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,8 +58,8 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">Start here</div>
-<h1>A small server. A clear path to production.</h1>
-<p class="lead">Deploy Pixie, serve your pages, and understand what happens between a request and its response.</p>
+<h1>Pixie HTTP server</h1>
+<p class="lead">Deploy Pixie, configure a site, or see how it handles requests.</p>
 <article>
 <div class="hero-note">
 <span class="status-dot">
@@ -67,31 +67,30 @@
 <div class="path-grid">
 <a class="path-card" href="deploy.html">
 <span class="step">01 / USE PIXIE</span>
-<h2>Deploy your first site</h2>
-<p>Choose how to run Pixie, point it at your files, then add HTTPS when you need it.</p>
+<h2>Deploy Pixie</h2>
+<p>Run the sample site, then add your own pages.</p>
 <span class="card-link">Open the user guide ↗</span>
 </a>
 <a class="path-card" href="architecture.html">
 <span class="step">02 / UNDER THE HOOD</span>
-<h2>Understand a request</h2>
-<p>See how configuration, HTTP, routing, TLS, and worker threads fit together.</p>
+<h2>How Pixie works</h2>
+<p>Follow a request through HTTP, routing, and TLS.</p>
 <span class="card-link">Explore the features ↗</span>
 </a>
 </div>
-<h2 id="quick-start">Run Pixie</h2>
-<p>Start the published container with its default settings:</p>
+<h2 id="quick-start">Run the container</h2>
 <pre>
 <code>docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest</code>
 </pre>
-<p>Open <a href="http://localhost:8080/">http://localhost:8080/</a>. To show your own pages, follow <a href="serve.html">Serve a website</a>. For local development or custom settings, start with <a href="deploy.html">deployment</a> and <a href="configure.html">configuration</a>.</p>
+<p>Open <a href="http://localhost:8080/">localhost:8080</a>. Add your pages with <a href="serve.html">Serve a website</a>.</p>
 <aside class="callout">
-<strong>Read the version you run.</strong>
-<p>These pages describe this source branch. A published image or package may contain an earlier release. HTTP/3 is experimental and opt-in. HTTP/1.2 and HTTP/1.3 are not standardized versions.</p>
+<strong>Version notes</strong>
+<p>HTTP/3 is experimental and opt-in. HTTP/1.2 and HTTP/1.3 are not standardized versions.</p>
 </aside>
-<h2 id="choose">Find the right guide</h2>
+<h2 id="choose">Guides</h2>
 <ul class="link-list">
 <li>
-<a href="configure.html">Change the address, workers, or web root <span>Configuration →</span>
+<a href="configure.html">Set the address, workers, or web root <span>Configuration →</span>
 </a>
 </li>
 <li>
@@ -108,8 +107,7 @@
 </li>
 </ul>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>

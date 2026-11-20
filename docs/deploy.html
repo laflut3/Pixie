@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Start locally, run a container, or use the Linux and Kubernetes packaging in this repository.">
 <meta name="theme-color" content="#f7f4eb">
-<title>Choose your deployment. — Pixie docs</title>
+<title>Deploy Pixie · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,15 +58,21 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">User guide</div>
-<h1>Choose your deployment.</h1>
-<p class="lead">Start locally, run a container, or use the Linux and Kubernetes packaging in this repository.</p>
+<h1>Deploy Pixie</h1>
+<p class="lead">Use Docker, Cargo, a Linux package, or Helm.</p>
 <article>
-<h2 id="docker">Docker</h2>
-<p>Docker is the shortest path to the sample site. The image is published for amd64 and arm64.</p>
+<h2 id="docker">Docker image</h2>
+<p>Pull the latest image or pin a release:</p>
+<pre>
+<code>docker pull ghcr.io/laflut3/pixie:latest
+docker pull ghcr.io/laflut3/pixie:v1.2.0</code>
+</pre>
+<p><a href="https://github.com/laflut3/Pixie/pkgs/container/pixie">View image versions</a> · <a href="https://github.com/laflut3/Pixie/releases">Release notes and packages</a></p>
+<p>Run the latest image. It supports amd64 and arm64.</p>
 <pre>
 <code>docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest</code>
 </pre>
-<p>From a repository checkout, build the current source or use Compose:</p>
+<p>Build from the repository or use Compose:</p>
 <pre>
 <code>docker build -f infrastructure/docker/Dockerfile -t pixie:local .
 docker run --rm -p 8080:8080 pixie:local
@@ -76,48 +82,47 @@ docker compose -f infrastructure/docker/compose.yaml up -d</code>
 </pre>
 <p>Compose mounts <code>infrastructure/config/config-pixie.yml</code>. Stop it with <code>docker compose -f infrastructure/docker/compose.yaml down</code>.</p>
 <h2 id="cargo">Local Cargo build</h2>
-<p>Run these commands in the repository root with the Rust toolchain required by <code>Cargo.toml</code>.</p>
+<p>Run from the repository root with the Rust version in <code>Cargo.toml</code>.</p>
 <pre>
 <code>PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked</code>
 </pre>
-<p>The supplied config listens on <code>0.0.0.0:8080</code>. The repository's <code>web/</code> supplies the pages.</p>
+<p>The sample listens on <code>0.0.0.0:8080</code> and serves <code>web/</code>.</p>
 <h2 id="linux">Debian / Ubuntu and Arch Linux</h2>
-<p>The Debian/Ubuntu installer configures the signed APT repository. It supports amd64 and arm64. Review the installer before running it:</p>
+<p>Review the installer before running it. APT packages support amd64 and arm64:</p>
 <pre>
 <code>curl -fsSLo install-pixie.sh https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/apt/install.sh
 less install-pixie.sh
 bash install-pixie.sh
 sudo systemctl enable --now pixie</code>
 </pre>
-<p>On Arch Linux, use the AUR package (x86_64 or aarch64):</p>
+<p>Arch Linux (x86_64 or aarch64):</p>
 <pre>
 <code>yay -S pixie-git
 sudo systemctl enable --now pixie</code>
 </pre>
-<p>To build a Debian package locally:</p>
+<p>Build a Debian package locally:</p>
 <pre>
 <code>infrastructure/scripts/build-deb.sh
 sudo apt install ./pixie_*.deb
 sudo systemctl enable --now pixie</code>
 </pre>
-<p>For service logs, use <code>journalctl -u pixie -f</code>. Packaged configuration lives in <code>/etc/pixie/config-pixie.yml</code>.</p>
+<p>Config: <code>/etc/pixie/config-pixie.yml</code>. Logs: <code>journalctl -u pixie -f</code>.</p>
 <h2 id="kubernetes">Kubernetes with Helm</h2>
 <pre>
 <code>helm upgrade --install pixie infrastructure/helm/pixie \
   --namespace pixie --create-namespace
 kubectl -n pixie port-forward service/pixie-pixie 8080:8080</code>
 </pre>
-<p>The chart exposes a ClusterIP service. Add your own Ingress or Gateway for external traffic. Its values cover the address, workers, image, service, and resources. Set <code>tls.enabled=true</code> and <code>tls.secretName</code> to mount a Kubernetes TLS Secret. HTTP/3 also requires TLS and <code>http3.enabled=true</code>, which exposes the configured UDP port.</p>
+<p>The chart creates a ClusterIP service. Add an Ingress or Gateway for external traffic. Set <code>tls.enabled=true</code> and <code>tls.secretName</code> to mount a TLS Secret. HTTP/3 also needs <code>http3.enabled=true</code> and an exposed UDP port.</p>
 <h2 id="check">Check your endpoint</h2>
 <pre>
 <code>curl -i http://localhost:8080/
 curl -I http://localhost:8080/
 curl -i http://localhost:8080/missing</code>
 </pre>
-<p>Expect 200 for the home page and 404 for a missing page. See <a href="configure.html">configuration</a> before changing the listen port, and <a href="security.html">TLS &amp; mTLS</a> before exposing HTTPS.</p>
+<p>Expect 200 for the home page and 404 for a missing page. See <a href="configure.html">configuration</a> or <a href="security.html">TLS and mTLS</a> to change settings.</p>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>

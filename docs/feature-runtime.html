@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Configuration, TLS, concurrency, and logs.">
 <meta name="theme-color" content="#f7f4eb">
-<title>The runtime features. — Pixie docs</title>
+<title>Runtime and TLS · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,32 +58,31 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">How it works</div>
-<h1>The runtime features.</h1>
-<p class="lead">Configuration, TLS, concurrency, and logs.</p>
+<h1>Runtime and TLS</h1>
+<p class="lead">Configuration, connections, and logs.</p>
 <article>
-<h2 id="configuration">Feature: configuration</h2>
+<h2 id="configuration">Configuration</h2>
 <p>
-<code>src/config.rs</code> selects a YAML, TOML, or JSON parser from the file extension. Compiled defaults cover missing values. An explicit TLS section requires a certificate and key. Configuration is loaded once at startup. See the <a href="configure.html">format examples and option reference</a>.</p>
-<h2 id="tls">Feature: TLS and mTLS</h2>
+<code>src/config.rs</code> reads YAML, TOML, or JSON by extension. Missing options use defaults. TLS requires a certificate and key. See <a href="configure.html">configuration</a>.</p>
+<h2 id="tls">TLS and mTLS</h2>
 <p>
-<code>src/tls.rs</code> loads the PEM chain and private key into a rustls server config. Without a client CA it authenticates the server only. With a client CA it uses WebPkiClientVerifier to require a trusted client certificate. Credentials are loaded once, and async TLS handshakes run per connection. ALPN negotiates HTTP/2 or HTTP/1.1. Experimental HTTP/3 uses a separate QUIC UDP listener and also requires TLS.</p>
-<h2 id="concurrency">Feature: worker pool</h2>
+<code>src/tls.rs</code> loads the PEM certificate and key. Add a client CA to require mTLS. ALPN negotiates HTTP/2 or HTTP/1.1. Experimental HTTP/3 uses TLS over a separate QUIC listener.</p>
+<h2 id="concurrency">Workers</h2>
 <p>
-<code>src/server.rs</code> creates a Tokio multi-thread runtime using the configured worker count. Connections are asynchronous tasks; they do not reserve one runtime thread while waiting for network I/O. There is no explicit connection admission limit.</p>
-<h2 id="logging">Feature: logging</h2>
+<code>src/server.rs</code> runs async connections on a Tokio thread pool. Pixie has no connection limit.</p>
+<h2 id="logging">Logging</h2>
 <p>
-<code>src/logger.rs</code> sends info, warning, and error messages to stderr. Startup logs show the address, worker count, TLS mode, and web root. There is no structured per-request access log or metrics endpoint yet.</p>
+<code>src/logger.rs</code> writes startup, warning, and error messages to stderr. There are no access logs or metrics endpoint.</p>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>
 <nav aria-label="On this page">
-<a href="#configuration">Feature: configuration</a>
-<a href="#tls">Feature: TLS and mTLS</a>
-<a href="#concurrency">Feature: worker pool</a>
-<a href="#logging">Feature: logging</a>
+<a href="#configuration">Configuration</a>
+<a href="#tls">TLS and mTLS</a>
+<a href="#concurrency">Workers</a>
+<a href="#logging">Logging</a>
 </nav>
 </aside>
 </div>

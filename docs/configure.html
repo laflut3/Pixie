@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Configure Pixie with YAML, TOML, or JSON. Select the config file through an environment variable.">
 <meta name="theme-color" content="#f7f4eb">
-<title>One file. A few options. — Pixie docs</title>
+<title>Configuration · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,9 +58,9 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">User guide</div>
-<h1>Choose a format. Keep the same settings.</h1>
-<p class="lead">Pixie accepts YAML, TOML, and JSON. Pick the format you prefer; the file extension tells Pixie how to read it, and the option names stay the same.</p>
-<aside class="callout"><strong>Start with one file.</strong><p>Save one of the examples below, then set <code>PIXIE_CONFIG</code> to its path. If you do not set it, Pixie searches the default YAML, TOML, and JSON filenames.</p></aside>
+<h1>Configuration</h1>
+<p class="lead">Use YAML, TOML, or JSON with the same option names.</p>
+<aside class="callout"><strong>Choose one file.</strong><p>Set <code>PIXIE_CONFIG</code> to its path. Otherwise Pixie searches the default filenames.</p></aside>
 <article>
 <h2 id="yaml">YAML · <code>config-pixie.yml</code></h2>
 <pre>
@@ -82,7 +82,7 @@ workers = 4</code>
 <pre>
 <code>PIXIE_CONFIG=./config-pixie.toml PIXIE_WEB_ROOT=./my-site cargo run --locked</code>
 </pre>
-<p>Replace the filename with the YAML or JSON file you saved. Accepted extensions are <code>.yml</code>, <code>.yaml</code>, <code>.toml</code>, and <code>.json</code>. Relative paths are resolved from the process working directory; use absolute paths in services and containers.</p>
+<p>Set <code>PIXIE_CONFIG</code> to the file you saved. Its extension selects the parser: <code>.yml</code>, <code>.yaml</code>, <code>.toml</code>, or <code>.json</code>. Relative paths use the process working directory. Use absolute paths in services.</p>
 <h2 id="options">Configuration reference</h2>
 <div class="table-wrap">
 <table>
@@ -171,7 +171,7 @@ workers = 4</code>
 </ol>
 <aside class="callout">
 <strong>A missing explicit file uses the built-in defaults.</strong>
-<p>If <code>PIXIE_CONFIG</code> names a file that does not exist, Pixie does not search other locations. Invalid contents or an unsupported extension stop startup. Check the startup log to confirm the address Pixie is using.</p>
+<p>If the file is missing, Pixie uses built-in defaults and skips other locations. Invalid contents or an unsupported extension stop startup. Check the startup log for the listen address.</p>
 </aside>
 <h2 id="root">Web root lookup</h2>
 <ol>
@@ -181,10 +181,9 @@ workers = 4</code>
 <li>
 <code>/usr/share/pixie/web</code>.</li>
 </ol>
-<p>An invalid PIXIE_WEB_ROOT produces a warning and uses the fallback. Set it explicitly for custom sites. Restart Pixie after changing config or TLS files; page files are read on each request.</p>
+<p>An invalid <code>PIXIE_WEB_ROOT</code> logs a warning and uses the fallback. Restart Pixie after config or TLS changes. Page files reload on each request.</p>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Enable server TLS, then optionally require a certificate from every client.">
 <meta name="theme-color" content="#f7f4eb">
-<title>HTTPS, with client trust. — Pixie docs</title>
+<title>TLS and mTLS · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,11 +58,11 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">User guide</div>
-<h1>HTTPS, with client trust.</h1>
-<p class="lead">Enable server TLS, then optionally require a certificate from every client.</p>
+<h1>TLS and mTLS</h1>
+<p class="lead">Enable HTTPS or require client certificates.</p>
 <article>
 <h2 id="tls">Enable HTTPS</h2>
-<p>Save this config and provide certificate files readable by the Pixie process:</p>
+<p>Save this config. Make both PEM files readable by Pixie:</p>
 <pre>
 <code>addr: 0.0.0.0:8443
 workers: 4
@@ -70,11 +70,11 @@ tls:
   cert_file: /etc/pixie/tls/server-chain.pem
   key_file: /etc/pixie/tls/server-key.pem</code>
 </pre>
-<p>The chain file contains the server certificate first, followed by intermediates. The key is an unencrypted PEM private key supported by rustls. Use a certificate valid for the hostname clients use, protect the key with filesystem permissions, and restart after renewal.</p>
+<p>Put the server certificate first in the chain, followed by intermediates. Use an unencrypted PEM key valid for the client hostname. Restart Pixie after renewal.</p>
 <pre>
 <code>curl --cacert server-ca.pem https://localhost:8443/</code>
 </pre>
-<p>For a certificate trusted by your system, omit <code>--cacert</code>. Pixie does not obtain or renew certificates automatically. The configured listener serves HTTPS only; it does not also serve HTTP or redirect it.</p>
+<p>Omit <code>--cacert</code> for a system-trusted certificate. Pixie does not issue or renew certificates. This listener serves HTTPS only and does not redirect HTTP.</p>
 <h2 id="mtls">Require client certificates</h2>
 <p>Add the trusted client CA bundle:</p>
 <pre>
@@ -88,28 +88,27 @@ tls:
   --cert client.pem --key client-key.pem \
   https://localhost:8443/</code>
 </pre>
-<p>Clients without a valid certificate trusted by the configured CA fail the handshake. This authenticates a client certificate; Pixie does not provide user accounts or per-route authorization.</p>
+<p>Pixie rejects clients without a valid certificate from that CA. It does not provide user accounts or route-level authorization.</p>
 <h2 id="mounts">Container and Kubernetes setup</h2>
-<p>Mount the config, server chain, key, and optional client CA as read-only files, and expose the configured TCP port. The supplied templates do not mount credentials automatically.</p>
+<p>Mount the config and certificates as read-only files, then expose the TCP port. Deployment templates do not mount credentials.</p>
 <pre>
 <code>docker run --rm -p 8443:8443 \
   -v &quot;$PWD/config-pixie.yml:/etc/pixie/config-pixie.yml:ro&quot; \
   -v &quot;$PWD/tls:/etc/pixie/tls:ro&quot; \
   ghcr.io/laflut3/pixie:latest</code>
 </pre>
-<p>The container runs as <code>pixie</code>; file permissions must allow that account to read the mounted credentials. For Kubernetes, mount a Secret and use a deployment configuration that points to its files. If TLS terminates at an Ingress instead, the connection from it to Pixie remains plain HTTP unless configured separately.</p>
+<p>Allow the <code>pixie</code> user to read the files. In Kubernetes, mount a Secret. TLS terminated at an Ingress leaves the Ingress-to-Pixie connection unencrypted unless you configure TLS there too.</p>
 <h2 id="http3">Experimental HTTP/3</h2>
-<p>HTTP/3 uses QUIC over UDP and is experimental. Enable <code>http3.addr</code> in Pixie configuration. In Helm, set <code>tls.enabled=true</code>, <code>tls.secretName</code>, and <code>http3.enabled=true</code>; expose the selected UDP port in the firewall and any external load balancer. The current chart mounts the Secret as <code>/etc/pixie/tls</code>.</p>
+<p>HTTP/3 is experimental and uses QUIC over UDP. Set <code>http3.addr</code>; in Helm also set <code>tls.enabled=true</code>, <code>tls.secretName</code>, and <code>http3.enabled=true</code>. Expose the UDP port. The chart mounts the Secret at <code>/etc/pixie/tls</code>.</p>
 <h2 id="troubleshoot">When a connection fails</h2>
 <ul>
-<li>Startup error: check the config file syntax, certificate chain, key match, file paths, and permissions.</li>
-<li>Client trust error: check the server hostname and the trusted server CA.</li>
-<li>mTLS failure: check the client certificate, private key, expiry, and trusted client CA.</li>
-<li>Connection refused: check the configured port, container mapping, service, and firewall.</li>
+<li>Startup error: check config syntax, certificate chain, key, paths, and permissions.</li>
+<li>Trust error: check the hostname and server CA.</li>
+<li>mTLS error: check the client certificate, key, expiry, and CA.</li>
+<li>Connection refused: check the port, service, and firewall.</li>
 </ul>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>

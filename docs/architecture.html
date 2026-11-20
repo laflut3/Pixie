@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="A compact feature map of the current Rust implementation, from startup to response.">
 <meta name="theme-color" content="#f7f4eb">
-<title>Follow the request. — Pixie docs</title>
+<title>Request flow · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,34 +58,34 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">How it works</div>
-<h1>Follow the request.</h1>
-<p class="lead">A compact feature map of the current Rust implementation, from startup to response.</p>
+<h1>Request flow</h1>
+<p class="lead">From startup to response.</p>
 <article>
 <h2 id="flow">The request path</h2>
 <ol class="timeline">
 <li>
 <strong>Configuration</strong>
-<p><code>main.rs</code> loads the selected YAML, TOML, or JSON file, then resolves the listen address, worker count, and optional TLS files.</p>
+<p><code>main.rs</code> loads config and resolves the address, workers, and TLS files.</p>
 </li>
 <li>
 <strong>Connection acceptance</strong>
-<p>server.rs runs a Tokio runtime, accepts TCP connections, and spawns an asynchronous Hyper connection task for each one.</p>
+<p><code>server.rs</code> accepts TCP connections and starts a Hyper task for each one.</p>
 </li>
 <li>
 <strong>TLS handshake</strong>
-<p>With TLS configured, rustls validates credentials and optionally authenticates a client certificate before HTTP parsing.</p>
+<p>When enabled, rustls checks the server credentials and, with mTLS, the client certificate.</p>
 </li>
 <li>
 <strong>HTTP parsing</strong>
-<p>Hyper parses HTTP/1.x or HTTP/2 messages. Pixie's handler accepts GET or HEAD and passes the URL path to the router.</p>
+<p>Hyper parses HTTP/1.x or HTTP/2. Pixie accepts GET and HEAD, then passes the path to the router.</p>
 </li>
 <li>
 <strong>Route and file</strong>
-<p>The router maps a simple page name to an HTML file under the selected web root.</p>
+<p>The router maps a page name to an HTML file in the web root.</p>
 </li>
 <li>
 <strong>Response</strong>
-<p>Hyper writes the status, content type, content length, and body. HTTP/1 connections close after the response; HTTP/2 follows stream semantics. HEAD omits the body.</p>
+<p>Hyper sends the status, headers, and body. HTTP/1 closes after one response. HEAD omits the body.</p>
 </li>
 </ol>
 <h2 id="features">Explore each feature</h2>
@@ -101,8 +101,7 @@
 </li>
 </ul>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>

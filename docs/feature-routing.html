@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Web roots, route names, and how files become responses.">
 <meta name="theme-color" content="#f7f4eb">
-<title>From URL to HTML. — Pixie docs</title>
+<title>Routing and files · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,20 +58,19 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">How it works</div>
-<h1>From URL to HTML.</h1>
-<p class="lead">Web roots, route names, and how files become responses.</p>
+<h1>Routing and files</h1>
+<p class="lead">Page names map to HTML files in the web root.</p>
 <article>
-<h2 id="routing">Feature: static routing</h2>
+<h2 id="routing">Static routes</h2>
 <p>
-<code>src/router.rs</code> chooses the web root and appends <code>.html</code> to a valid page name. The home page is <code>hello.html</code>. Query strings do not change the selected file. Paths with separators, encoded characters, or dot segments are rejected. Files are read as UTF-8 text on each request.</p>
+<code>src/router.rs</code> appends <code>.html</code> to valid page names. The home page is <code>hello.html</code>. Query strings are ignored. Paths with separators, encoded characters, or dot segments are rejected. Pixie reads each file as UTF-8 on request.</p>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>
 <nav aria-label="On this page">
-<a href="#routing">Feature: static routing</a>
+<a href="#routing">Static routes</a>
 </nav>
 </aside>
 </div>

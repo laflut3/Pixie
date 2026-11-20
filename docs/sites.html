@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Use separate Pixie processes and a front proxy when you need NGINX-style virtual hosting.">
 <meta name="theme-color" content="#f7f4eb">
-<title>One domain. One site. — Pixie docs</title>
+<title>Host multiple sites · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,14 +58,14 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">User guide</div>
-<h1>One domain. One site.</h1>
-<p class="lead">Use separate Pixie processes and a front proxy when you need NGINX-style virtual hosting.</p>
+<h1>Host multiple sites</h1>
+<p class="lead">Run one Pixie instance per site behind NGINX.</p>
 <article>
-<h2 id="model">How multiple sites work today</h2>
-<p>Pixie has one web root and one listener per process. It does not select a root from the Host header, provide server blocks, proxy upstreams, or rewrite path prefixes. Run an instance per site on a different local port, then route domains through NGINX.</p>
+<h2 id="model">One instance per site</h2>
+<p>Pixie does not select a site by host name. Each process has one web root and listener. Run each site on a local port, then route domains through NGINX.</p>
 <div class="flow" aria-label="Request routing">Browser <span>→</span> NGINX :80 <span>→</span> Pixie :8081 / :8082</div>
 <h2 id="instances">Start two instances</h2>
-<p>Create <code>/srv/pixie/alpha</code> and <code>/srv/pixie/beta</code>, each with <code>hello.html</code> and <code>404.html</code>. Save two configs:</p>
+<p>Create <code>/srv/pixie/alpha</code> and <code>/srv/pixie/beta</code>, each with <code>hello.html</code> and <code>404.html</code>. Save these configs:</p>
 <pre>
 <code># /etc/pixie/alpha.yml
 addr: 127.0.0.1:8081
@@ -75,14 +75,14 @@ workers: 4
 addr: 127.0.0.1:8082
 workers: 4</code>
 </pre>
-<p>Run these in separate terminals for a local demonstration. A production service manager should keep both processes running.</p>
+<p>Run them in separate terminals. Use a service manager in production.</p>
 <pre>
 <code>PIXIE_CONFIG=/etc/pixie/alpha.yml PIXIE_WEB_ROOT=/srv/pixie/alpha pixie
 # In another terminal:
 PIXIE_CONFIG=/etc/pixie/beta.yml PIXIE_WEB_ROOT=/srv/pixie/beta pixie</code>
 </pre>
 <h2 id="nginx">Route domains with NGINX</h2>
-<p>After installing NGINX, add these blocks to its site configuration. Replace the example domains and point their DNS records at the host.</p>
+<p>Add these blocks to NGINX. Replace the example domains and point DNS to this host.</p>
 <pre>
 <code>server {
     listen 80;
@@ -107,9 +107,9 @@ server {
 sudo systemctl reload nginx
 curl -H &quot;Host: alpha.example.com&quot; http://127.0.0.1/</code>
 </pre>
-<p>This example uses HTTP on the front proxy. Configure its certificates and HTTPS listener for public HTTPS, or configure HTTPS on each Pixie instance as described in <a href="security.html">TLS &amp; mTLS</a>.</p>
+<p>For HTTPS, configure TLS on NGINX or on each Pixie instance. See <a href="security.html">TLS and mTLS</a>.</p>
 <h2 id="paths">Serve sites under path prefixes</h2>
-<p>A proxy can strip the prefix before forwarding to the matching instance:</p>
+<p>NGINX can strip a path prefix before proxying:</p>
 <pre>
 <code>location /alpha/ {
     proxy_pass http://127.0.0.1:8081/;
@@ -120,10 +120,9 @@ location /beta/ {
     proxy_set_header Host $host;
 }</code>
 </pre>
-<p>The trailing slash on proxy_pass strips the matched prefix: <code>/alpha/about</code> reaches Pixie as <code>/about</code>. Use prefix-aware or relative links in your HTML. General asset serving remains outside the current Pixie router.</p>
+<p>The trailing slash strips the prefix: <code>/alpha/about</code> reaches Pixie as <code>/about</code>. Use relative links. Pixie does not serve assets.</p>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>

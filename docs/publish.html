@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Preview this site locally or publish it alongside the existing APT repository.">
 <meta name="theme-color" content="#f7f4eb">
-<title>Static files. Ready to host. — Pixie docs</title>
+<title>Host the docs · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,52 +58,37 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">Documentation</div>
-<h1>Static files. Ready to host.</h1>
-<p class="lead">Preview this site locally or publish it alongside the existing APT repository.</p>
+<h1>Host the docs</h1>
+<p class="lead">Static HTML. No build required.</p>
 <article>
 <h2 id="preview">Preview locally</h2>
-<p>This site uses plain HTML, CSS, and a small JavaScript file. There is no package manager, build command, or remote font dependency. From the repository root, use an installed static server, for example Python:</p>
+<p>From the repository root:</p>
 <pre>
 <code>python3 -m http.server 8000 --directory docs</code>
 </pre>
-<p>Open <a href="http://localhost:8000/">http://localhost:8000/</a>. You can also open <code>docs/index.html</code> directly; navigation and reading work without JavaScript.</p>
+<p>Open <a href="http://localhost:8000/">localhost:8000</a>.</p>
 <aside class="callout">
-<strong>Serve this documentation with a general static host.</strong>
-<p>Pixie's current router serves named HTML pages only, so it cannot serve this site's separate stylesheet and script. Use GitHub Pages, NGINX, or another static file host for this documentation.</p>
+<strong>Use a static host.</strong>
+<p>Pixie does not serve this site's CSS or JavaScript files.</p>
 </aside>
-<h2 id="pages">The simplest repository setup: GitHub Pages</h2>
-<p>The release workflow already publishes the signed APT repository to GitHub Pages. It now copies <code>docs/</code> into the same artifact at <code>public/docs/</code>, preserving the APT files at the root.</p>
+<h2 id="cloudflare">Cloudflare Pages</h2>
 <ol>
-<li>In GitHub repository Settings → Pages, select GitHub Actions as the source.</li>
-<li>Configure the APT signing secrets required by <code>.github/workflows/publish-apt.yml</code>.</li>
-<li>Publish a version tag matching Cargo.toml when you intend to release.</li>
-<li>Open <code>https://laflut3.github.io/Pixie/docs/</code> after the workflow succeeds.</li>
+<li>Connect the <code>laflut3/Pixie</code> repository and select <code>main</code>.</li>
+<li>Set build command to <code>exit 0</code> and output directory to <code>docs</code>.</li>
+<li>Add <code>pixie.fleothing.com</code> under Custom domains.</li>
 </ol>
-<p>Documentation deploys with that release workflow. The URL is the expected destination, not a claim that it is already live. Avoid a second Pages workflow that uploads only docs: it would replace the APT repository.</p>
+<p>Each push to <code>main</code> deploys the site. See Cloudflare's <a href="https://developers.cloudflare.com/pages/framework-guides/deploy-anything/">Pages guide</a> and <a href="https://developers.cloudflare.com/pages/configuration/custom-domains/">custom domain guide</a>.</p>
 <h2 id="other-hosts">Any static host</h2>
-<p>Upload the contents of <code>docs/</code> into a directory on your host. All local links are relative, so the site works at the domain root or under <code>/docs/</code>. HTTPS and cache policy belong to the host.</p>
-<h2 id="cloudflare">Use pixie.fleothing.com with Cloudflare Pages</h2>
-<ol>
-<li>In Cloudflare, open <strong>Workers &amp; Pages</strong> and create a Pages project from the <code>laflut3/Pixie</code> GitHub repository.</li>
-<li>Choose <code>main</code> as the production branch, set the build command to <code>exit 0</code>, and set the build output directory to <code>docs</code>.</li>
-<li>After the first deployment, open the project’s <strong>Custom domains</strong> tab, choose <strong>Set up a domain</strong>, and enter <code>pixie.fleothing.com</code>.</li>
-<li>Cloudflare will connect the subdomain to Pages. Confirm the suggested DNS record in the <code>fleothing.com</code> zone, then wait for the domain status to become active.</li>
-</ol>
-<p>Future pushes to <code>main</code> redeploy the site. No build tool or separate documentation workflow is needed. See Cloudflare’s <a href="https://developers.cloudflare.com/pages/framework-guides/deploy-anything/">static Pages deployment guide</a> and <a href="https://developers.cloudflare.com/pages/configuration/custom-domains/">custom domain guide</a>.</p>
-<h2 id="maintain">Maintain these pages</h2>
-<p>Use the same navigation and shared assets for new pages. Keep practical instructions in the user guide and feature behavior in How it works. Verify examples against current source and keep supported features distinct from planned ones. Relevant pages must be reviewed whenever runtime behavior, configuration, or deployment changes.</p>
+<p>Serve <code>docs/</code> at the domain root or under <code>/docs/</code>.</p>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>
 <nav aria-label="On this page">
 <a href="#preview">Preview locally</a>
-<a href="#pages">The simplest repository setup: GitHub Pages</a>
+<a href="#cloudflare">Cloudflare Pages</a>
 <a href="#other-hosts">Any static host</a>
-<a href="#cloudflare">Cloudflare Pages domain</a>
-<a href="#maintain">Maintain these pages</a>
 </nav>
 </aside>
 </div>

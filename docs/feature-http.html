@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="HTTP versions, validation, and response behavior.">
 <meta name="theme-color" content="#f7f4eb">
-<title>HTTP request handling. — Pixie docs</title>
+<title>HTTP handling · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/site.js" defer>
@@ -58,12 +58,12 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">How it works</div>
-<h1>HTTP request handling.</h1>
-<p class="lead">HTTP versions, validation, and response behavior.</p>
+<h1>HTTP handling</h1>
+<p class="lead">Supported versions and response codes.</p>
 <article>
-<h2 id="http">Feature: HTTP/1.x and HTTP/2</h2>
+<h2 id="http">HTTP/1.x and HTTP/2</h2>
 <p>
-<code>src/server.rs</code> uses Tokio and Hyper to serve HTTP/1.0, HTTP/1.1, and HTTP/2. HTTP/2 is negotiated through TLS ALPN; plaintext HTTP uses HTTP/1.x. HTTP/1.1 requests require Host. Pixie accepts GET and HEAD and closes HTTP/1 connections after one response.</p>
+<code>src/server.rs</code> serves HTTP/1.0, HTTP/1.1, and HTTP/2. HTTP/2 uses TLS ALPN. Plaintext connections use HTTP/1.x. HTTP/1.1 requires <code>Host</code>. Pixie accepts GET and HEAD, then closes HTTP/1 connections.</p>
 <div class="table-wrap">
 <table>
 <thead>
@@ -104,15 +104,14 @@
 </tbody>
 </table>
 </div>
-<p>HTTP/3 over QUIC is available as an experimental, opt-in listener. Caching validators, ranges, compression, and uploads are outside the current feature set. HTTP/1.2 and HTTP/1.3 are not standardized versions.</p>
+<p>HTTP/3 over QUIC is experimental and opt-in. Pixie does not support caching validators, ranges, compression, or uploads. HTTP/1.2 and HTTP/1.3 are not standardized versions.</p>
 </article>
-<footer>Pixie documentation <span>Built from the source. Updated with the features.</span>
-</footer>
+<footer>Pixie docs</footer>
 </main>
 <aside class="toc">
 <p>ON THIS PAGE</p>
 <nav aria-label="On this page">
-<a href="#http">Feature: HTTP/1.x</a>
+<a href="#http">HTTP versions</a>
 </nav>
 </aside>
 </div>
