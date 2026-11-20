@@ -31,6 +31,53 @@ fn runtime_config_reads_file_from_pixie_config() {
     assert_eq!(config.workers, 8);
 }
 
+/// Verifies that a TOML file is selected from its extension.
+#[test]
+fn runtime_config_reads_toml_file() {
+    let _lock = env_lock();
+    let path = unique_path("pixie-config", "toml");
+    fs::write(&path, "addr = \"0.0.0.0:9091\"\nworkers = 5\n")
+        .expect("could not write TOML config");
+    let _config = EnvGuard::set("PIXIE_CONFIG", path.to_str().expect("path is not UTF-8"));
+
+    let config = runtime_config().expect("invalid TOML runtime configuration");
+    assert_eq!(config.addr, "0.0.0.0:9091");
+    assert_eq!(config.workers, 5);
+
+    fs::remove_file(path).expect("could not remove TOML config");
+}
+
+/// Verifies that a JSON file is selected from its extension.
+#[test]
+fn runtime_config_reads_json_file() {
+    let _lock = env_lock();
+    let path = unique_path("pixie-config", "json");
+    fs::write(&path, r#"{"addr":"0.0.0.0:9092","workers":6}"#)
+        .expect("could not write JSON config");
+    let _config = EnvGuard::set("PIXIE_CONFIG", path.to_str().expect("path is not UTF-8"));
+
+    let config = runtime_config().expect("invalid JSON runtime configuration");
+    assert_eq!(config.addr, "0.0.0.0:9092");
+    assert_eq!(config.workers, 6);
+
+    fs::remove_file(path).expect("could not remove JSON config");
+}
+
+/// Verifies that unsupported config extensions produce a clear error.
+#[test]
+fn runtime_config_rejects_unknown_file_extension() {
+    let _lock = env_lock();
+    let path = unique_path("pixie-config", "conf");
+    fs::write(&path, "addr = 127.0.0.1:9090").expect("could not write config");
+    let _config = EnvGuard::set("PIXIE_CONFIG", path.to_str().expect("path is not UTF-8"));
+
+    let err = runtime_config().expect_err("expected unsupported extension error");
+    assert_eq!(err.kind(), std::io::ErrorKind::InvalidInput);
+    assert!(err.to_string().contains("use .yml, .yaml, .toml, or .json"));
+
+    fs::remove_file(path).expect("could not remove config");
+}
+
 /// Verifies the worker fallback when `workers` is zero.
 #[test]
 fn runtime_config_ignore_workers_zero() {

@@ -2,8 +2,8 @@
 //!
 //! Configuration lookup order:
 //! 1. file set by `PIXIE_CONFIG` (when non-empty)
-//! 2. `config-pixie.yml` in the current directory
-//! 3. `/etc/pixie/config-pixie.yml`
+//! 2. `config-pixie.{yml,yaml,toml,json}` in the current directory
+//! 3. `/etc/pixie/config-pixie.{yml,yaml,toml,json}`
 //! 4. compiled defaults
 
 use serde::Deserialize;
@@ -12,8 +12,9 @@ use std::{env, fs, io, path::Path};
 const DEFAULT_HOST: &str = "127.0.0.1";
 const DEFAULT_PORT: u16 = 80;
 const DEFAULT_THREADS: usize = 4;
-const LOCAL_CONFIG_PATH: &str = "config-pixie.yml";
-const SYSTEM_CONFIG_PATH: &str = "/etc/pixie/config-pixie.yml";
+const CONFIG_EXTENSIONS: [&str; 4] = ["yml", "yaml", "toml", "json"];
+const LOCAL_CONFIG_PREFIX: &str = "config-pixie";
+const SYSTEM_CONFIG_PREFIX: &str = "/etc/pixie/config-pixie";
 const CONFIG_ENV_VAR: &str = "PIXIE_CONFIG";
 
 /// Final configuration used by the server.
@@ -37,7 +38,7 @@ pub struct TlsConfig {
     pub client_ca_file: Option<String>,
 }
 
-/// Partial YAML representation before normalization.
+/// Partial configuration representation before normalization.
 #[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
 struct FileConfig {
     #[serde(default, alias = "address")]
@@ -136,8 +137,8 @@ fn load_file_config() -> io::Result<Option<FileConfig>> {
         return read_config_if_exists(&path);
     }
 
-    for path in [LOCAL_CONFIG_PATH, SYSTEM_CONFIG_PATH] {
-        if let Some(config) = read_config_if_exists(path)? {
+    for path in config_paths(LOCAL_CONFIG_PREFIX).chain(config_paths(SYSTEM_CONFIG_PREFIX)) {
+        if let Some(config) = read_config_if_exists(&path)? {
             return Ok(Some(config));
         }
     }
@@ -145,7 +146,7 @@ fn load_file_config() -> io::Result<Option<FileConfig>> {
     Ok(None)
 }
 
-/// Reads and parses a YAML file only when it exists and is a regular file.
+/// Reads and parses a configuration file only when it exists and is a regular file.
 fn read_config_if_exists(path: &str) -> io::Result<Option<FileConfig>> {
     let path = Path::new(path);
 
@@ -155,14 +156,44 @@ fn read_config_if_exists(path: &str) -> io::Result<Option<FileConfig>> {
 
     let raw = fs::read_to_string(path)?;
 
-    let config = serde_yaml::from_str::<FileConfig>(&raw).map_err(|err| {
-        io::Error::new(
-            io::ErrorKind::InvalidData,
-            format!("invalid YAML in {}: {err}", path.display()),
-        )
-    })?;
+    let format = path
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    let config = match format.as_str() {
+        "yml" | "yaml" => serde_yaml::from_str::<FileConfig>(&raw)
+            .map_err(|err| invalid_config(path, "YAML", err))?,
+        "toml" => {
+            toml::from_str::<FileConfig>(&raw).map_err(|err| invalid_config(path, "TOML", err))?
+        }
+        "json" => serde_json::from_str::<FileConfig>(&raw)
+            .map_err(|err| invalid_config(path, "JSON", err))?,
+        _ => {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!(
+                    "unsupported configuration extension for {}: use .yml, .yaml, .toml, or .json",
+                    path.display()
+                ),
+            ));
+        }
+    };
 
     Ok(Some(config))
+}
+
+fn config_paths(prefix: &'static str) -> impl Iterator<Item = String> {
+    CONFIG_EXTENSIONS
+        .into_iter()
+        .map(move |extension| format!("{prefix}.{extension}"))
+}
+
+fn invalid_config(path: &Path, format: &str, error: impl std::fmt::Display) -> io::Error {
+    io::Error::new(
+        io::ErrorKind::InvalidData,
+        format!("invalid {format} in {}: {error}", path.display()),
+    )
 }
 
 /// Computes the address from file configuration.

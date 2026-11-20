@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Set the listener, concurrency, and TLS credentials with YAML. Select your pages through an environment variable.">
-<meta name="theme-color" content="#f5f8ff">
+<meta name="description" content="Configure Pixie with YAML, TOML, or JSON. Select the config file through an environment variable.">
+<meta name="theme-color" content="#f7f4eb">
 <title>One file. A few options. — Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
@@ -58,18 +58,31 @@
 </aside>
 <main id="content" tabindex="-1">
 <div class="eyebrow">User guide</div>
-<h1>One file. A few options.</h1>
-<p class="lead">Set the listener, concurrency, and TLS credentials with YAML. Select your pages through an environment variable.</p>
+<h1>Choose a format. Keep the same settings.</h1>
+<p class="lead">Pixie accepts YAML, TOML, and JSON. Pick the format you prefer; the file extension tells Pixie how to read it, and the option names stay the same.</p>
+<aside class="callout"><strong>Start with one file.</strong><p>Save one of the examples below, then set <code>PIXIE_CONFIG</code> to its path. If you do not set it, Pixie searches the default YAML, TOML, and JSON filenames.</p></aside>
 <article>
-<h2 id="example">A plain HTTP configuration</h2>
+<h2 id="yaml">YAML · <code>config-pixie.yml</code></h2>
 <pre>
 <code>addr: 0.0.0.0:8080
 workers: 4</code>
 </pre>
+<h2 id="toml">TOML · <code>config-pixie.toml</code></h2>
 <pre>
-<code>PIXIE_CONFIG=./config-pixie.yml PIXIE_WEB_ROOT=./my-site cargo run --locked</code>
+<code>addr = "0.0.0.0:8080"
+workers = 4</code>
 </pre>
-<p>Save the YAML as <code>config-pixie.yml</code>. Paths in configuration are resolved from the process working directory, so use absolute paths for services.</p>
+<h2 id="json">JSON · <code>config-pixie.json</code></h2>
+<pre>
+<code>{
+  "addr": "0.0.0.0:8080",
+  "workers": 4
+}</code>
+</pre>
+<pre>
+<code>PIXIE_CONFIG=./config-pixie.toml PIXIE_WEB_ROOT=./my-site cargo run --locked</code>
+</pre>
+<p>Replace the filename with the YAML or JSON file you saved. Accepted extensions are <code>.yml</code>, <code>.yaml</code>, <code>.toml</code>, and <code>.json</code>. Relative paths are resolved from the process working directory; use absolute paths in services and containers.</p>
 <h2 id="options">Configuration reference</h2>
 <div class="table-wrap">
 <table>
@@ -152,13 +165,13 @@ workers: 4</code>
 <h2 id="lookup">Which file is loaded?</h2>
 <ol>
 <li>If <code>PIXIE_CONFIG</code> is nonempty, Pixie uses that path.</li>
-<li>Otherwise, it looks for <code>config-pixie.yml</code> in the working directory.</li>
-<li>Then it looks for <code>/etc/pixie/config-pixie.yml</code>.</li>
+<li>Otherwise, it looks for <code>config-pixie.yml</code>, <code>config-pixie.yaml</code>, <code>config-pixie.toml</code>, then <code>config-pixie.json</code> in the working directory.</li>
+<li>Then it checks the same names under <code>/etc/pixie/</code>.</li>
 <li>Without a file, compiled defaults apply.</li>
 </ol>
 <aside class="callout">
-<strong>A missing explicit file falls back to defaults.</strong>
-<p>When PIXIE_CONFIG points to a missing file, the other file locations are skipped. Invalid YAML fails startup. Check the startup log for the actual address.</p>
+<strong>A missing explicit file uses the built-in defaults.</strong>
+<p>If <code>PIXIE_CONFIG</code> names a file that does not exist, Pixie does not search other locations. Invalid contents or an unsupported extension stop startup. Check the startup log to confirm the address Pixie is using.</p>
 </aside>
 <h2 id="root">Web root lookup</h2>
 <ol>
@@ -176,7 +189,9 @@ workers: 4</code>
 <aside class="toc">
 <p>ON THIS PAGE</p>
 <nav aria-label="On this page">
-<a href="#example">A plain HTTP configuration</a>
+<a href="#yaml">YAML example</a>
+<a href="#toml">TOML example</a>
+<a href="#json">JSON example</a>
 <a href="#options">Configuration reference</a>
 <a href="#lookup">Which file is loaded?</a>
 <a href="#root">Web root lookup</a>
