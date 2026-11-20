@@ -23,4 +23,4 @@ tokio-rustls = "0.26"
 h3 = "0.0.8"
 h3-quinn = "0.0.10"
 quinn = { version = "0.11", default-features = false, features = ["runtime-tokio", "rustls-aws-lc-rs"] }
-cap-std = "3"
+cap-std = "4"
