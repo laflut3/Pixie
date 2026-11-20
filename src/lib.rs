@@ -19,5 +19,5 @@ pub use crate::logger::log_info;
 pub use crate::logger::log_warn;
 pub use crate::router::resolve_route;
 pub use crate::router::resolve_web_root;
-pub use crate::server::run_server;
+pub use crate::server::{run_server, run_server_with_tls};
 pub use crate::threadpool::ThreadPool;

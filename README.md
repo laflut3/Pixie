@@ -2,6 +2,8 @@
 
 Pixie is a lightweight static HTTP server written in Rust. It serves the HTML files in `web/`. The sample deployment configuration listens on `0.0.0.0:8080`.
 
+Pixie currently supports HTTP/1.0 and HTTP/1.1. HTTPS can be enabled with TLS certificates, with optional client-certificate verification (mTLS); see [TLS configuration](infrastructure/docs/tls.md). HTTP/2 and HTTP/3 are not implemented yet. HTTP/1.2 and HTTP/1.3 are not standardized protocol versions.
+
 ## Install
 
 [Quick installation commands](infrastructure/docs/install.md)

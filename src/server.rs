@@ -10,20 +10,28 @@ use std::{
 };
 
 use crate::{
-    ThreadPool,
+    ThreadPool, TlsConfig,
     logger::{log_error, log_info},
     router::{resolve_route, resolve_web_root},
+    tls::{accept_tls, load_server_config},
 };
 
 const MAX_REQUEST_BYTES: usize = 8 * 1024;
 const IO_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
+    run_server_with_tls(addr, pool_size, None)
+}
+
+/// Starts the server with optional TLS credentials.
+pub fn run_server_with_tls(addr: &str, pool_size: usize, tls: Option<TlsConfig>) -> io::Result<()> {
     let listener = TcpListener::bind(addr)?;
     let pool = ThreadPool::new(pool_size);
     let web_root = Arc::new(resolve_web_root());
+    let tls = tls.as_ref().map(load_server_config).transpose()?;
     log_info(format_args!(
-        "listening on {addr} with {pool_size} workers (web_root={})",
+        "listening on {addr} with {pool_size} workers, tls={} (web_root={})",
+        tls.is_some(),
         web_root.display()
     ));
 
@@ -31,8 +39,9 @@ pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
         match stream {
             Ok(stream) => {
                 let root = Arc::clone(&web_root);
+                let tls = tls.clone();
                 pool.execute(move || {
-                    if let Err(err) = handle_connection(stream, root.as_path()) {
+                    if let Err(err) = handle_connection(stream, root.as_path(), tls) {
                         log_error(format_args!("failed to handle connection: {err}"));
                     }
                 });
@@ -43,9 +52,46 @@ pub fn run_server(addr: &str, pool_size: usize) -> io::Result<()> {
     Ok(())
 }
 
-fn handle_connection(mut stream: TcpStream, web_root: &Path) -> io::Result<()> {
+enum ClientStream {
+    Plain(TcpStream),
+    Tls(rustls::StreamOwned<rustls::ServerConnection, TcpStream>),
+}
+
+impl Read for ClientStream {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        match self {
+            Self::Plain(s) => s.read(buf),
+            Self::Tls(s) => s.read(buf),
+        }
+    }
+}
+impl Write for ClientStream {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        match self {
+            Self::Plain(s) => s.write(buf),
+            Self::Tls(s) => s.write(buf),
+        }
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        match self {
+            Self::Plain(s) => s.flush(),
+            Self::Tls(s) => s.flush(),
+        }
+    }
+}
+
+fn handle_connection(
+    stream: TcpStream,
+    web_root: &Path,
+    tls: Option<Arc<rustls::ServerConfig>>,
+) -> io::Result<()> {
     stream.set_read_timeout(Some(IO_TIMEOUT))?;
     stream.set_write_timeout(Some(IO_TIMEOUT))?;
+    let mut stream = if let Some(config) = tls {
+        ClientStream::Tls(accept_tls(stream, config)?)
+    } else {
+        ClientStream::Plain(stream)
+    };
     let mut reader = BufReader::new(&mut stream);
     let mut request = Vec::new();
     loop {
@@ -167,11 +213,11 @@ fn handle_connection(mut stream: TcpStream, web_root: &Path) -> io::Result<()> {
     write_response(&mut stream, status, &body, method == "HEAD")
 }
 
-fn bad_request(stream: &mut TcpStream) -> io::Result<()> {
+fn bad_request(stream: &mut impl Write) -> io::Result<()> {
     write_response(stream, "HTTP/1.1 400 Bad Request", "Bad request", false)
 }
 
-fn write_response(stream: &mut TcpStream, status: &str, body: &str, head: bool) -> io::Result<()> {
+fn write_response(stream: &mut impl Write, status: &str, body: &str, head: bool) -> io::Result<()> {
     write!(
         stream,
         "{status}\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",

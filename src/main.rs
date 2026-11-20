@@ -1,6 +1,6 @@
 use std::{io, process};
 
-use pixie::{log_error, run_server, runtime_config};
+use pixie::{log_error, run_server_with_tls, runtime_config};
 
 /// Binary entry point.
 ///
@@ -15,5 +15,5 @@ fn main() -> io::Result<()> {
         }
     };
 
-    run_server(&config.addr, config.workers)
+    run_server_with_tls(&config.addr, config.workers, config.tls)
 }
