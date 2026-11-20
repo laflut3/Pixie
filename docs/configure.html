@@ -138,11 +138,17 @@ workers: 4</code>
 <td>Absent</td>
 <td>Trusted client CAs; setting it requires client certificates.</td>
 </tr>
+<tr>
+<td><code>http3.addr</code></td>
+<td>Absent</td>
+<td>Optional QUIC/UDP listen address. Requires TLS; HTTP/3 support is experimental.</td>
+</tr>
 </tbody>
 </table>
 </div>
 <p>
 <code>address</code> is an alias for <code>addr</code>; <code>nb_worker</code> is an alias for <code>workers</code>. Port 80 may require elevated privileges; prefer 8080 for local use. The shipped sample configuration uses 8080.</p>
+<p>To enable experimental HTTP/3, configure TLS and add <code>http3: { addr: "0.0.0.0:8443" }</code>. Expose that port over UDP in the host firewall and deployment. See the <a href="security.html">TLS guide</a>.</p>
 <h2 id="lookup">Which file is loaded?</h2>
 <ol>
 <li>If <code>PIXIE_CONFIG</code> is nonempty, Pixie uses that path.</li>

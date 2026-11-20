@@ -5,6 +5,7 @@
   <p>
     <img alt="Rust" src="https://img.shields.io/badge/Rust-2024-d9471a?style=flat-square">
     <img alt="HTTP" src="https://img.shields.io/badge/HTTP-1.0%20%7C%201.1%20%7C%202-1764a8?style=flat-square">
+    <img alt="HTTP/3" src="https://img.shields.io/badge/HTTP%2F3-experimental-7952b3?style=flat-square">
     <img alt="HTTPS" src="https://img.shields.io/badge/HTTPS-TLS%20%7C%20mTLS-168279?style=flat-square">
   </p>
   <p><a href="docs/index.html"><strong>📖 Documentation</strong></a> · <a href="docs/publish.html">Host the docs</a></p>
