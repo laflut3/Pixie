@@ -59,11 +59,17 @@
 <main id="content" tabindex="-1">
 <div class="eyebrow">How it works</div>
 <h1>Routing and files</h1>
-<p class="lead">Page names map to HTML files in the web root.</p>
+<p class="lead">The request host and path select a file beneath the configured sites directory.</p>
 <article>
-<h2 id="routing">Static routes</h2>
-<p>
-<code>src/router.rs</code> appends <code>.html</code> to valid page names. The home page is <code>hello.html</code>. Query strings are ignored. Paths with separators, encoded characters, or dot segments are rejected. Pixie reads each file as UTF-8 on request.</p>
+<h2 id="routing">Host selection</h2>
+<p><code>src/sites.rs</code> checks <code>/etc/pixie/sites/&lt;hostname&gt;</code> for each request. It lowercases the host and removes the port. If there is no matching folder, it checks <code>/etc/pixie/sites/default</code>. <code>PIXIE_WEB_ROOT</code> overrides this lookup for a single site.</p>
+<h2 id="paths">Path mapping</h2>
+<p><code>src/router.rs</code> normalizes the URL path and confines reads to the selected site. A directory serves <code>index.html</code>; <code>hello.html</code> remains the home page fallback. Missing files use <code>404.html</code> when available and return 404.</p>
+<p>Static responses include a MIME type based on the file extension. HTML, CSS, JavaScript, images, fonts, and other binary files are returned as bytes. Files are read on request, so updates appear without restarting Pixie.</p>
+<h2 id="safety">Path safety</h2>
+<p>Hidden paths, traversal segments, encoded separators, and symlinks that escape the site directory are rejected. This keeps requests inside the selected root even when a client supplies unusual paths.</p>
+<h2 id="spa">Single-page apps</h2>
+<p>Set <code>PIXIE_SPA_FALLBACK=true</code> to serve root <code>index.html</code> for missing extensionless paths. Pixie leaves missing file-like paths such as <code>/logo.png</code> as 404 responses.</p>
 </article>
 <footer>Pixie docs</footer>
 </main>
@@ -71,6 +77,9 @@
 <p>ON THIS PAGE</p>
 <nav aria-label="On this page">
 <a href="#routing">Static routes</a>
+<a href="#paths">Path mapping</a>
+<a href="#safety">Path safety</a>
+<a href="#spa">Single-page apps</a>
 </nav>
 </aside>
 </div>

@@ -3,136 +3,52 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Use separate Pixie processes and a front proxy when you need NGINX-style virtual hosting.">
+<meta name="description" content="Serve multiple static sites by hostname, or mount a React build.">
 <meta name="theme-color" content="#f7f4eb">
-<title>Host multiple sites · Pixie docs</title>
+<title>Multiple sites · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
-<script src="assets/site.js" defer>
-</script>
+<script src="assets/site.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#content">Skip to content</a>
 <header class="topbar">
-<a class="brand" href="index.html">
-<img src="assets/mark.svg" width="32" height="32" alt="">
-<span>pixie<span class="brand-sub"> / docs</span>
-</span>
-</a>
-<div class="top-actions">
-<span class="version">SOURCE GUIDE</span>
-<a href="https://github.com/laflut3/Pixie">GitHub ↗</a>
-<button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button>
-</div>
+<a class="brand" href="index.html"><img src="assets/mark.svg" width="32" height="32" alt=""><span>pixie<span class="brand-sub"> / docs</span></span></a>
+<div class="top-actions"><span class="version">USER GUIDE</span><a href="https://github.com/laflut3/Pixie">GitHub ↗</a><button class="menu-button" aria-expanded="false" aria-controls="sidebar">Menu</button></div>
 </header>
 <div class="layout">
-<aside id="sidebar" class="sidebar">
-<nav aria-label="Documentation">
-<div class="nav-group">
-<p>Start here</p>
-<a href="index.html">Overview</a>
-</div>
-<div class="nav-group">
-<p>User guide</p>
-<a href="deploy.html">Deploy Pixie</a>
-<a href="configure.html">Configuration</a>
-<a href="serve.html">Serve a website</a>
-<a href="security.html">TLS &amp; mTLS</a>
-<a aria-current="page" href="sites.html">Multiple sites</a>
-</div>
-<div class="nav-group">
-<p>How it works</p>
-<a href="architecture.html">Request flow</a>
-<a href="feature-http.html">HTTP handling</a>
-<a href="feature-routing.html">Routing &amp; files</a>
-<a href="feature-runtime.html">Runtime &amp; TLS</a>
-</div>
-<div class="nav-group">
-<p>Documentation</p>
-<a href="publish.html">Host the documentation</a>
-</div>
-</nav>
-<div class="sidebar-foot">
-<span class="status-dot">
-</span>Small Rust HTTP server</div>
-</aside>
+<aside id="sidebar" class="sidebar"><nav aria-label="Documentation">
+<div class="nav-group"><p>Start here</p><a href="index.html">Overview</a></div>
+<div class="nav-group"><p>User guide</p><a href="deploy.html">Deploy Pixie</a><a href="configure.html">Configuration</a><a href="serve.html">Serve a website</a><a href="security.html">TLS &amp; mTLS</a><a aria-current="page" href="sites.html">Multiple sites</a></div>
+<div class="nav-group"><p>How it works</p><a href="architecture.html">Request flow</a><a href="feature-http.html">HTTP handling</a><a href="feature-routing.html">Routing &amp; files</a><a href="feature-runtime.html">Runtime &amp; TLS</a></div>
+<div class="nav-group"><p>Documentation</p><a href="publish.html">Host the documentation</a></div>
+</nav><div class="sidebar-foot"><span class="status-dot"></span>Small Rust HTTP server</div></aside>
 <main id="content" tabindex="-1">
-<div class="eyebrow">User guide</div>
-<h1>Host multiple sites</h1>
-<p class="lead">Run one Pixie instance per site behind NGINX.</p>
+<div class="eyebrow">User guide</div><h1>Host multiple sites</h1>
+<p class="lead">Choose a site by hostname. Pixie checks the site folders on every request.</p>
 <article>
-<h2 id="model">One instance per site</h2>
-<p>Pixie does not select a site by host name. Each process has one web root and listener. Run each site on a local port, then route domains through NGINX.</p>
-<div class="flow" aria-label="Request routing">Browser <span>→</span> NGINX :80 <span>→</span> Pixie :8081 / :8082</div>
-<h2 id="instances">Start two instances</h2>
-<p>Create <code>/srv/pixie/alpha</code> and <code>/srv/pixie/beta</code>, each with <code>hello.html</code> and <code>404.html</code>. Save these configs:</p>
-<pre>
-<code># /etc/pixie/alpha.yml
-addr: 127.0.0.1:8081
-workers: 4
-
-# /etc/pixie/beta.yml
-addr: 127.0.0.1:8082
-workers: 4</code>
-</pre>
-<p>Run them in separate terminals. Use a service manager in production.</p>
-<pre>
-<code>PIXIE_CONFIG=/etc/pixie/alpha.yml PIXIE_WEB_ROOT=/srv/pixie/alpha pixie
-# In another terminal:
-PIXIE_CONFIG=/etc/pixie/beta.yml PIXIE_WEB_ROOT=/srv/pixie/beta pixie</code>
-</pre>
-<h2 id="nginx">Route domains with NGINX</h2>
-<p>Add these blocks to NGINX. Replace the example domains and point DNS to this host.</p>
-<pre>
-<code>server {
-    listen 80;
-    server_name alpha.example.com;
-    location / {
-        proxy_pass http://127.0.0.1:8081;
-        proxy_set_header Host $host;
-    }
-}
-
-server {
-    listen 80;
-    server_name beta.example.com;
-    location / {
-        proxy_pass http://127.0.0.1:8082;
-        proxy_set_header Host $host;
-    }
-}</code>
-</pre>
-<pre>
-<code>sudo nginx -t
-sudo systemctl reload nginx
-curl -H &quot;Host: alpha.example.com&quot; http://127.0.0.1/</code>
-</pre>
-<p>For HTTPS, configure TLS on NGINX or on each Pixie instance. See <a href="security.html">TLS and mTLS</a>.</p>
-<h2 id="paths">Serve sites under path prefixes</h2>
-<p>NGINX can strip a path prefix before proxying:</p>
-<pre>
-<code>location /alpha/ {
-    proxy_pass http://127.0.0.1:8081/;
-    proxy_set_header Host $host;
-}
-location /beta/ {
-    proxy_pass http://127.0.0.1:8082/;
-    proxy_set_header Host $host;
-}</code>
-</pre>
-<p>The trailing slash strips the prefix: <code>/alpha/about</code> reaches Pixie as <code>/about</code>. Use relative links. Pixie does not serve assets.</p>
+<h2 id="folders">Create site folders</h2>
+<pre><code>sudo mkdir -p /etc/pixie/sites/{default,alpha.example.com,beta.example.com}
+sudo cp -R ./site-a/. /etc/pixie/sites/alpha.example.com/
+sudo cp -R ./site-b/. /etc/pixie/sites/beta.example.com/</code></pre>
+<p>Pixie serves the matching hostname folder and falls back to <code>default/</code>. Each site can contain HTML, CSS, JavaScript, images, and other static files. Put <code>index.html</code> at the site root.</p>
+<pre><code>curl -H 'Host: alpha.example.com' http://localhost:8080/</code></pre>
+<h2 id="react">Mount a React build</h2>
+<pre><code>docker run --rm -p 8080:8080 \
+  -v "$PWD/dist:/etc/pixie/sites/default:ro" \
+  -e PIXIE_SPA_FALLBACK=true \
+  ghcr.io/laflut3/pixie:latest</code></pre>
+<p>Build the app first so <code>dist/</code> exists. The fallback serves <code>index.html</code> for extensionless client-side routes.</p>
+<h2 id="image">Bake a site into an image</h2>
+<pre><code>FROM ghcr.io/laflut3/pixie:latest
+COPY dist/ /etc/pixie/sites/default/</code></pre>
+<h2 id="paths">Change the sites directory</h2>
+<pre><code>PIXIE_SITES_ROOT=/srv/pixie/sites</code></pre>
+<p>Single-site deployments can keep using <code>PIXIE_WEB_ROOT</code>. A reverse proxy such as NGINX can terminate TLS or forward requests; preserve the original <code>Host</code> header for hostname routing.</p>
 </article>
 <footer>Pixie docs</footer>
 </main>
-<aside class="toc">
-<p>ON THIS PAGE</p>
-<nav aria-label="On this page">
-<a href="#model">How multiple sites work today</a>
-<a href="#instances">Start two instances</a>
-<a href="#nginx">Route domains with NGINX</a>
-<a href="#paths">Serve sites under path prefixes</a>
-</nav>
-</aside>
+<aside class="toc"><p>ON THIS PAGE</p><nav aria-label="On this page"><a href="#folders">Create site folders</a><a href="#react">Mount a React build</a><a href="#image">Bake a site into an image</a><a href="#paths">Change the sites directory</a></nav></aside>
 </div>
 </body>
 </html>

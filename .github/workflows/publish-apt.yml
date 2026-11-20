@@ -93,7 +93,7 @@ jobs:
           docker run --rm \
             -e APT_GPG_PRIVATE_KEY -e APT_GPG_KEY_ID -e APT_GPG_PASSPHRASE \
             -v "$PWD:/work" -w /work archlinux:base \
-            bash -c 'pacman -Sy --noconfirm archlinux-keyring && pacman -S --noconfirm gnupg && infrastructure/arch/build-repository.sh packages public/arch'
+            bash -c 'pacman -Sy --noconfirm archlinux-keyring && pacman -Syu --noconfirm gnupg libarchive && infrastructure/arch/build-repository.sh packages public/arch'
           cp public/arch/*/*.pkg.tar.zst.sig packages/
       - name: Install Helm
         uses: azure/setup-helm@v4

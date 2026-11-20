@@ -8,7 +8,7 @@ This directory contains Pixie's deployment and packaging assets.
 - `helm/pixie/`: Kubernetes Helm chart
 - `apt/`: signed APT repository generation and installation scripts
 - `debian/`: Debian package metadata, service unit, and man page
-- `arch/`: Arch Linux AUR packaging
+- `arch/`: signed Arch package repository and installer
 - `config/`: default runtime configuration installed by packages and images
 - `scripts/`: local package build helpers
 - `docs/install.md`: quick install commands
@@ -31,4 +31,4 @@ The Docker build context is the repository root:
 docker build -f infrastructure/docker/Dockerfile -t pixie:local .
 ```
 
-Build a local Debian package with `infrastructure/scripts/build-deb.sh`. Publishing the public APT repository is automated by `.github/workflows/publish-apt.yml` when a version tag such as `v1.1.0` is pushed. Configure the repository's `APT_GPG_PRIVATE_KEY` Actions secret and `APT_GPG_KEY_ID` Actions variable and (for a passphrase-protected key) the `APT_GPG_PASSPHRASE` Actions secret, and enable GitHub Pages with the GitHub Actions deployment source before the first release.
+Create each stable release by updating `Cargo.toml`, `Cargo.lock`, and `infrastructure/helm/pixie/Chart.yaml`, then pushing a matching `vX.Y.Z` tag. The release workflow publishes Docker tags, Linux packages, signed APT and Arch repositories, a Helm chart, and release notes. Configure `APT_GPG_PRIVATE_KEY` as a repository Actions secret; `APT_GPG_PASSPHRASE` is optional. Enable GitHub Pages with the GitHub Actions deployment source before the first release. Use SemVer: patch for fixes, minor for compatible features, and major for breaking changes.

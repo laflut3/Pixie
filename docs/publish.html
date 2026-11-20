@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Preview this site locally or publish it alongside the existing APT repository.">
+<meta name="description" content="Preview the static documentation locally or deploy it to a static host.">
 <meta name="theme-color" content="#f7f4eb">
 <title>Host the docs · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
@@ -67,10 +67,7 @@
 <code>python3 -m http.server 8000 --directory docs</code>
 </pre>
 <p>Open <a href="http://localhost:8000/">localhost:8000</a>.</p>
-<aside class="callout">
-<strong>Use a static host.</strong>
-<p>Pixie does not serve this site's CSS or JavaScript files.</p>
-</aside>
+<p>Pixie serves CSS and JavaScript assets, so this documentation can also run on Pixie.</p>
 <h2 id="cloudflare">Cloudflare Pages</h2>
 <ol>
 <li>Connect the <code>laflut3/Pixie</code> repository and select <code>main</code>.</li>

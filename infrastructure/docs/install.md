@@ -48,20 +48,17 @@ sudo systemctl enable --now pixie
 
 Pin a release with `bash install-pixie.sh --version v1.2.0`. The prebuilt archives use static musl binaries.
 
-## From a source checkout
+## Serve a static site
 
 ```sh
-infrastructure/scripts/install.sh --source
-sudo systemctl enable --now pixie
+sudo mkdir -p /etc/pixie/sites/default
+sudo cp -R ./dist/. /etc/pixie/sites/default/
+sudo systemctl restart pixie
 ```
 
-Or build a Debian package:
+## React single-page app
 
-```sh
-infrastructure/scripts/build-deb.sh
-sudo apt install ./pixie_*.deb
-sudo systemctl enable --now pixie
-```
+Set `PIXIE_SPA_FALLBACK=true` in the Pixie service environment.
 
 ## Check
 
@@ -69,4 +66,4 @@ sudo systemctl enable --now pixie
 curl http://localhost:8080/
 ```
 
-Config lives in `/etc/pixie/config-pixie.yml`; pages live in `/usr/share/pixie/web`. APT, Arch, and binary downloads become available after the release workflow publishes them. The third-party Arch repository is separate from Arch's official repositories. The source-based AUR package remains available as `pixie-git`.
+Config: `/etc/pixie/config-pixie.yml`. Sites: `/etc/pixie/sites/default` or `/etc/pixie/sites/<hostname>`. APT, Arch, Helm, and binary downloads are published when a matching SemVer tag is pushed. Each patch, feature, or breaking release gets a matching `vX.Y.Z` tag.

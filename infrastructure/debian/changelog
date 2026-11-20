@@ -1,3 +1,10 @@
+pixie (1.2.0-1) unstable; urgency=medium
+
+  * Add hostname-based static sites, static assets, and optional SPA fallback.
+  * Publish multi-architecture container images, Helm charts, and Linux packages.
+
+ -- Léo Torres <leo0609leo@gmail.com>  Fri, 20 Nov 2026 17:30:00 +0100
+
 pixie (1.1.0-7) unstable; urgency=medium
 
   * Fix Debian build failure on mentors by making Cargo manifest

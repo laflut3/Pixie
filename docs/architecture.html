@@ -81,11 +81,11 @@
 </li>
 <li>
 <strong>Route and file</strong>
-<p>The router maps a page name to an HTML file in the web root.</p>
+<p>The request host selects a site folder; the URL path selects a file inside it. Pixie resolves common MIME types and can fall back to <code>index.html</code> for a single-page app.</p>
 </li>
 <li>
 <strong>Response</strong>
-<p>Hyper sends the status, headers, and body. HTTP/1 closes after one response. HEAD omits the body.</p>
+<p>Hyper sends the status, headers, and body. HEAD returns the same headers without a body. HTTP/1 connections close after one response.</p>
 </li>
 </ol>
 <h2 id="features">Explore each feature</h2>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Start locally, run a container, or use the Linux and Kubernetes packaging in this repository.">
+<meta name="description" content="Install Pixie with Docker, Helm, Debian, Arch, or the Linux installer.">
 <meta name="theme-color" content="#f7f4eb">
 <title>Deploy Pixie · Pixie docs</title>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
@@ -59,10 +59,10 @@
 <main id="content" tabindex="-1">
 <div class="eyebrow">User guide</div>
 <h1>Deploy Pixie</h1>
-<p class="lead">Use Docker, Cargo, a Linux package, or Helm.</p>
+<p class="lead">Install from a published image, chart, or Linux package.</p>
 <article>
 <h2 id="docker">Docker image</h2>
-<p>Pull the latest image or pin a release:</p>
+<p>Pull the latest or pin a SemVer release:</p>
 <pre>
 <code>docker pull ghcr.io/laflut3/pixie:latest
 docker pull ghcr.io/laflut3/pixie:v1.2.0</code>
@@ -72,55 +72,33 @@ docker pull ghcr.io/laflut3/pixie:v1.2.0</code>
 <pre>
 <code>docker run --rm -p 8080:8080 ghcr.io/laflut3/pixie:latest</code>
 </pre>
-<p>Build from the repository or use Compose:</p>
+<p>The port mapping exposes Pixie's port <code>8080</code> at <code>localhost:8080</code>.</p>
+<h2 id="linux">Debian / Ubuntu</h2>
 <pre>
-<code>docker build -f infrastructure/docker/Dockerfile -t pixie:local .
-docker run --rm -p 8080:8080 pixie:local
-
-# Or use the published image through Compose
-docker compose -f infrastructure/docker/compose.yaml up -d</code>
-</pre>
-<p>Compose mounts <code>infrastructure/config/config-pixie.yml</code>. Stop it with <code>docker compose -f infrastructure/docker/compose.yaml down</code>.</p>
-<h2 id="cargo">Local Cargo build</h2>
-<p>Run from the repository root with the Rust version in <code>Cargo.toml</code>.</p>
-<pre>
-<code>PIXIE_CONFIG=infrastructure/config/config-pixie.yml cargo run --locked</code>
-</pre>
-<p>The sample listens on <code>0.0.0.0:8080</code> and serves <code>web/</code>.</p>
-<h2 id="linux">Debian / Ubuntu and Arch Linux</h2>
-<p>Review the installer before running it. APT packages support amd64 and arm64:</p>
-<pre>
-<code>curl -fsSLo install-pixie.sh https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/apt/install.sh
-less install-pixie.sh
-bash install-pixie.sh
+<code>curl -fsSL https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/apt/install.sh | bash -s -- --setup-only
+sudo apt install pixie
 sudo systemctl enable --now pixie</code>
 </pre>
-<p>Arch Linux (x86_64 or aarch64):</p>
+<h2 id="arch">Arch Linux</h2>
 <pre>
-<code>yay -S pixie-git
+<code>curl -fsSL https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/arch/install.sh | bash
+sudo pacman -Syu pixie
 sudo systemctl enable --now pixie</code>
 </pre>
-<p>Build a Debian package locally:</p>
+<h2 id="linux-installer">Linux installer</h2>
 <pre>
-<code>infrastructure/scripts/build-deb.sh
-sudo apt install ./pixie_*.deb
+<code>curl -fsSL https://raw.githubusercontent.com/laflut3/Pixie/main/infrastructure/scripts/install.sh | bash
 sudo systemctl enable --now pixie</code>
 </pre>
-<p>Config: <code>/etc/pixie/config-pixie.yml</code>. Logs: <code>journalctl -u pixie -f</code>.</p>
 <h2 id="kubernetes">Kubernetes with Helm</h2>
 <pre>
-<code>helm upgrade --install pixie infrastructure/helm/pixie \
+<code>helm repo add pixie https://laflut3.github.io/Pixie/charts
+helm repo update
+helm upgrade --install pixie pixie/pixie \
   --namespace pixie --create-namespace
 kubectl -n pixie port-forward service/pixie-pixie 8080:8080</code>
 </pre>
-<p>The chart creates a ClusterIP service. Add an Ingress or Gateway for external traffic. Set <code>tls.enabled=true</code> and <code>tls.secretName</code> to mount a TLS Secret. HTTP/3 also needs <code>http3.enabled=true</code> and an exposed UDP port.</p>
-<h2 id="check">Check your endpoint</h2>
-<pre>
-<code>curl -i http://localhost:8080/
-curl -I http://localhost:8080/
-curl -i http://localhost:8080/missing</code>
-</pre>
-<p>Expect 200 for the home page and 404 for a missing page. See <a href="configure.html">configuration</a> or <a href="security.html">TLS and mTLS</a> to change settings.</p>
+<p>Config and site files are described in <a href="configure.html">Configuration</a> and <a href="sites.html">Multiple sites</a>. See <a href="security.html">TLS and mTLS</a> for HTTPS.</p>
 </article>
 <footer>Pixie docs</footer>
 </main>
@@ -128,10 +106,10 @@ curl -i http://localhost:8080/missing</code>
 <p>ON THIS PAGE</p>
 <nav aria-label="On this page">
 <a href="#docker">Docker</a>
-<a href="#cargo">Local Cargo build</a>
-<a href="#linux">Debian / Ubuntu and Arch Linux</a>
+<a href="#linux">Debian / Ubuntu</a>
+<a href="#arch">Arch Linux</a>
+<a href="#linux-installer">Linux installer</a>
 <a href="#kubernetes">Kubernetes with Helm</a>
-<a href="#check">Check your endpoint</a>
 </nav>
 </aside>
 </div>

@@ -237,20 +237,19 @@
       </header>
 
       <section class="hero reveal delay-1">
-        <h1>Un serveur HTTP <span class="accent">simple</span>, clair, evolutif.</h1>
+        <h1>Un serveur HTTP <span class="accent">simple</span> pour vos sites statiques.</h1>
         <p class="lead">
-          Pixie demarre d'un TCP brut et construit progressivement un vrai socle HTTP:
-          parsing manuel, routing, reponses propres et architecture testable.
+          Déployez Pixie, déposez vos fichiers dans un dossier de site et servez vos pages avec HTTP ou HTTPS.
         </p>
 
         <div class="hero-grid">
           <article class="stat">
-            <b>100% Rust std</b>
-            <p>Sans framework cache: apprentissage direct du protocole.</p>
+            <b>HTTP/1 · HTTP/2 · HTTP/3</b>
+            <p>HTTP/3 est expérimental. TLS et mTLS sont disponibles.</p>
           </article>
           <article class="stat">
-            <b>Approche progressive</b>
-            <p>Chaque etape pose des bases solides pour la suite.</p>
+            <b>Un ou plusieurs sites</b>
+            <p>Un dossier par nom d'hôte, avec un dossier par défaut.</p>
           </article>
         </div>
 
@@ -259,16 +258,16 @@
 
       <section class="cards">
         <article class="card reveal delay-1">
-          <h3>Parsing HTTP</h3>
-          <p>Lecture ligne par ligne, extraction de la requete et preparation des headers.</p>
+          <h3>Fichiers statiques</h3>
+          <p>HTML, CSS, JavaScript, images et autres ressources.</p>
         </article>
         <article class="card reveal delay-2">
           <h3>Routing</h3>
-          <p>Dispatch clair des routes vers des handlers dedies, sans magie.</p>
+          <p>Pixie sélectionne un site selon le nom d'hôte reçu.</p>
         </article>
         <article class="card reveal delay-3">
-          <h3>Qualite</h3>
-          <p>CI avec fmt, clippy, tests et build pour garder un socle propre.</p>
+          <h3>Déploiement</h3>
+          <p>Images Docker, Helm, paquets Linux et installateur curl.</p>
         </article>
       </section>
     </main>
