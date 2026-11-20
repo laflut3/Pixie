@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*.*.*"
 
 permissions:
   contents: read
@@ -28,15 +26,7 @@ jobs:
         run: |
           image=ghcr.io/laflut3/pixie
           tags="${image}:${GITHUB_SHA}"
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
-            [[ "$GITHUB_REF_NAME" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo "Expected a stable SemVer tag: vX.Y.Z" >&2; exit 1; }
-            version="${GITHUB_REF_NAME#v}"
-            cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
-            test "$version" = "$cargo_version" || { echo "Tag and Cargo version differ" >&2; exit 1; }
-            tags="${tags},${image}:${GITHUB_REF_NAME},${image}:${version}"
-          else
-            tags="${tags},${image}:latest"
-          fi
+          tags="${tags},${image}:latest"
           echo "tags=$tags" >> "$GITHUB_OUTPUT"
 
       - name: Login to GitHub Container Registry
