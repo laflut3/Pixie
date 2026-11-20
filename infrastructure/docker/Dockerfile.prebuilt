@@ -1,0 +1,22 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system pixie \
+    && useradd --system --gid pixie --no-create-home pixie
+
+COPY usr/bin/pixie /usr/local/bin/pixie
+COPY usr/share/pixie/web /usr/share/pixie/web
+COPY etc/pixie/config-pixie.yml /etc/pixie/config-pixie.yml
+COPY etc/pixie/sites /etc/pixie/sites
+
+ENV PIXIE_CONFIG=/etc/pixie/config-pixie.yml
+ENV PIXIE_SITES_ROOT=/etc/pixie/sites
+
+EXPOSE 8080
+EXPOSE 8443/udp
+
+USER pixie
+
+ENTRYPOINT ["/usr/local/bin/pixie"]

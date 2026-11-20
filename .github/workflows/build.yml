@@ -9,49 +9,62 @@ permissions:
   contents: read
   packages: write
 
-env:
-  CONTAINER_REGISTRY: ghcr.io
-
 jobs:
   build:
-    name: Build app
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Select image tags
-        id: image
-        shell: bash
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build binary
+        run: cargo build --release --locked
+      - name: Prepare image context
         run: |
-          image=ghcr.io/laflut3/pixie
-          tags="${image}:${GITHUB_SHA}"
-          tags="${tags},${image}:latest"
-          echo "tags=$tags" >> "$GITHUB_OUTPUT"
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
+          mkdir -p image-context/usr/bin image-context/usr/share/pixie/web image-context/etc/pixie/sites/default
+          install -m 0755 target/release/pixie image-context/usr/bin/pixie
+          install -m 0644 infrastructure/config/config-pixie.yml image-context/etc/pixie/config-pixie.yml
+          cp web/*.html image-context/usr/share/pixie/web/
+          cp web/*.html image-context/etc/pixie/sites/default/
+          cp infrastructure/docker/Dockerfile.prebuilt image-context/Dockerfile
+      - uses: docker/login-action@v4
         with:
-          registry: ${{ env.CONTAINER_REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build and push
-        uses: docker/build-push-action@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
         with:
-          context: .
-          file: infrastructure/docker/Dockerfile
+          context: image-context
           push: true
-          platforms: linux/amd64, linux/arm64
-          tags: ${{ steps.image.outputs.tags }}
+          platforms: linux/${{ matrix.arch }}
+          tags: ghcr.io/laflut3/pixie:${{ github.sha }}-${{ matrix.arch }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v4
+      - name: Publish multi-architecture tags
+        env:
+          IMAGE: ghcr.io/laflut3/pixie
+        run: |
+          docker buildx imagetools create \
+            --tag "$IMAGE:$GITHUB_SHA" \
+            --tag "$IMAGE:latest" \
+            "$IMAGE:$GITHUB_SHA-amd64" \
+            "$IMAGE:$GITHUB_SHA-arm64"
