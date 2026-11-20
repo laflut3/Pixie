@@ -82,6 +82,14 @@
 <p>Documentation deploys with that release workflow. The URL is the expected destination, not a claim that it is already live. Avoid a second Pages workflow that uploads only docs: it would replace the APT repository.</p>
 <h2 id="other-hosts">Any static host</h2>
 <p>Upload the contents of <code>docs/</code> into a directory on your host. All local links are relative, so the site works at the domain root or under <code>/docs/</code>. HTTPS and cache policy belong to the host.</p>
+<h2 id="cloudflare">Use pixie.fleothing.com with Cloudflare Pages</h2>
+<ol>
+<li>In Cloudflare, open <strong>Workers &amp; Pages</strong> and create a Pages project from the <code>laflut3/Pixie</code> GitHub repository.</li>
+<li>Choose <code>main</code> as the production branch, set the build command to <code>exit 0</code>, and set the build output directory to <code>docs</code>.</li>
+<li>After the first deployment, open the project’s <strong>Custom domains</strong> tab, choose <strong>Set up a domain</strong>, and enter <code>pixie.fleothing.com</code>.</li>
+<li>Cloudflare will connect the subdomain to Pages. Confirm the suggested DNS record in the <code>fleothing.com</code> zone, then wait for the domain status to become active.</li>
+</ol>
+<p>Future pushes to <code>main</code> redeploy the site. No build tool or separate documentation workflow is needed. See Cloudflare’s <a href="https://developers.cloudflare.com/pages/framework-guides/deploy-anything/">static Pages deployment guide</a> and <a href="https://developers.cloudflare.com/pages/configuration/custom-domains/">custom domain guide</a>.</p>
 <h2 id="maintain">Maintain these pages</h2>
 <p>Use the same navigation and shared assets for new pages. Keep practical instructions in the user guide and feature behavior in How it works. Verify examples against current source and keep supported features distinct from planned ones. Relevant pages must be reviewed whenever runtime behavior, configuration, or deployment changes.</p>
 </article>
@@ -94,6 +102,7 @@
 <a href="#preview">Preview locally</a>
 <a href="#pages">The simplest repository setup: GitHub Pages</a>
 <a href="#other-hosts">Any static host</a>
+<a href="#cloudflare">Cloudflare Pages domain</a>
 <a href="#maintain">Maintain these pages</a>
 </nav>
 </aside>
